@@ -1,6 +1,0 @@
-=begin pod
-=TITLE This is a title
-
-Some text
-
-=end pod

@@ -1,3 +1,4 @@
+doctest
 lib/.precomp
 t/tmp/doc
 t/tmp/ref
