@@ -7,7 +7,12 @@ use File::Directory::Tree;
 use-ok 'Pod::Cached';
 
 use Pod::Cached;
-empty-directory 't/tmp';
+if 't/tmp'.IO ~~ :d  {
+    empty-directory 't/tmp';
+}
+else {
+    mktree 't/tmp'
+}
 
 my Pod::Cached $cache;
 throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>) },
