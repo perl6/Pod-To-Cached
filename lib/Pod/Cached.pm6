@@ -3,6 +3,7 @@ unit class Pod::Cached;
 use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
 use nqp;
+use JSON::Fast;
 
 =begin pod
 
@@ -70,17 +71,20 @@ for $cache.files -> $filename, %info {
 
 =end pod
 
-has Str $!path = 'pod-cache';
-has Str $!source = 'doc';
-has @!extensions = <pod pod6>;
+has Str $.path = 'pod-cache';
+has Str $.source = 'doc';
+has @.extensions = <pod pod6>;
 has Bool $.verbose is rw;
-has $!precomp;
-has $!precomp-store;
+has $.precomp;
+has $.precomp-store;
 has %.files;
 has @!pods;
 
-submethod BUILD( :$!source, :$!path, :$!verbose = True) {
+submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = True) {
+    my $threads = %*ENV<THREADS>.?Int // 1;
+    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     self.verify-source;
+    mktree $!path unless $!path.IO ~~ :d;
     self.verify-cache;
 }
 
@@ -96,9 +100,6 @@ method verify-source {
 }
 
 method verify-cache {
-    mktree $!path unless $!path.IO ~~ :d;
-    my $threads = %*ENV<THREADS>.?Int // 1;
-    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
     $!precomp = CompUnit::PrecompilationRepository::Default.new(store => $!precomp-store);
     for %!files.kv -> $pod-name, %info {
@@ -135,6 +136,18 @@ method update-cache {
             note "$pod-name failed to compile" if $!verbose;
         }
     }
+    self.save-index
+}
+
+method save-index {
+    my %h = gather for %!files.kv -> $fn, %inf {
+        take $fn => (
+            :cache-key(%inf<cache-key>),
+            :status(%inf<status>),
+
+            ).hash
+    };
+    "$!path/file-index.json".IO.spurt: to-json(%h);
 }
 
 method get-pods {

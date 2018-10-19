@@ -92,6 +92,7 @@ ok +$cache.tainted-files == 2, 'Found two files have been modified';
 
 $cache.update-cache;
 nok +$cache.failures.keys, 'Both pod files are correct';
+ok 't/tmp/ref/file-index.json'.IO ~~ :f, 'index file has been created';
 
 ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 
