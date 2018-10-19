@@ -1,9 +1,10 @@
 #! /usr/bin/env perl6
 use v6.c;
-use Pod::Cached;
 use Template::Mustache;
+use JSON::Fast;
+use nqp;
 
-unit class Pod::Cached::Render is Pod::Cached;
+unit class Pod::Render;
 
 =begin pod
 =TITLE Rendering pod
@@ -50,19 +51,52 @@ HTML file for each source pod.
 
 =end pod
 
-has $!templates;
-has $!rendering;
+has Str $!path;
+has Str $!templates;
+has Str $!rendering;
 has @!template-list = <main>; # list of all the templates needed
 has $!output;
+has Bool $!verbose;
+has %!files;
+has $!precomp;
+has $!precomp-store;
 
 submethod BUILD(
     :$!templates = 'resources/templates',
     :$!rendering = 'html',
-    :$!output = $!rendering
+    :$!output = $!rendering,
+    :$!verbose = True,
+    :$!path = 'pod-cache',
     ) {
-        self.check-things;
+    die '$!path is not a directory' unless $!path.IO ~~ :d;
+    die 'No file index in pod cache' unless "$!path/file-index.json".IO ~~ :f;
+    %!files = from-json("$!path/file-index.json".IO.slurp);
+    die 'No files in cache' unless +%!files.keys;
+    $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
+    $!precomp = CompUnit::PrecompilationRepository::Default.new(store => $!precomp-store);
+    for %!files.kv -> $pod-name, %info {
+        my $handle = $!precomp.load(%info<cache-key>)[0];
+        with $handle {
+            %!files{$pod-name}<handle> = $handle ;
+        }
+        else {
+            die "pod cache is corrupt, missing data for $pod-name";
+        }
     }
+    note 'Cache verified' if $!verbose;
+    self.verify-templates;
+}
 
-method check-things {
-    die 'No files in cache' unless +%.files.keys;
+method verify-templates {
+    return if $!templates eq 'resources/templates' and $!rendering eq 'html';
+    die "$!templates/$!rendering must be a directory" unless "$!templates/$!rendering".IO ~~ :d;
+    for @!template-list {
+        die "$_.mustache must exist under $!templates/$!rendering"
+            unless "$!templates/$!rendering/$_.mustache".IO ~~ :f
+    }
+    note 'Templates verified' if $!verbose;
+}
+
+method pod($filename) {
+    nqp::atkey(%!files{$filename}<handle>.unit,'$=pod')[0];
 }
