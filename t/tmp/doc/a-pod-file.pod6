@@ -1,0 +1,6 @@
+=pod A test file
+=TITLE This is a title
+
+Some text
+
+=end pod

@@ -1,0 +1,6 @@
+=pod Another test file
+=TITLE More and more
+
+Some more text
+
+=end pod
