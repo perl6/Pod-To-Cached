@@ -1,4 +1,4 @@
-=pod A test file
+=begin pod
 =TITLE This is a title
 
 Some text

@@ -14,6 +14,7 @@
     "depends" : [ "File::Directory::Tree" ],
     "test-depends" : [
         "Test",
+        "Test::Output",
         "File::Directory::Tree"
     ],
     "source-type" : "git",

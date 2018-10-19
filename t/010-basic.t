@@ -1,6 +1,7 @@
 #!/usr/bin/env perl6
 use lib 'lib';
 use Test;
+use Test::Output;
 use File::Directory::Tree;
 
 use-ok 'Pod::Cached';
@@ -51,9 +52,42 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>)},
 
 't/tmp/doc/a-second-pod-file.pod'.IO.unlink ;
 
-lives-ok { $cache = Pod::Cached.new(:source<t/tmp/doc>, :path<t/tmp/ref>) }, 'Instantiates OK';
+lives-ok { $cache = Pod::Cached.new(:source<t/tmp/doc>, :path<t/tmp/ref>, :!verbose) }, 'Instantiates OK';
 ok 't/tmp/ref'.IO ~~ :d, 'Correctly creates the repo directory';
 
+lives-ok {$cache.update-cache}, 'Verifies cache without dying';
+
+ok +$cache.failures.keys == 2, 'Both pod files contain errors';
+
+$cache = Nil;
+'t/tmp/doc/a-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE This is a title
+
+    Some text
+
+    =end pod
+    POD-CONTENT
+
+'t/tmp/doc/a-second-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE More and more
+
+    Some more text
+
+    =end pod
+    POD-CONTENT
+
+# turn on verbose
+stderr-like {$cache = Pod::Cached.new(:source<t/tmp/doc>, :path<t/tmp/ref>, :verbose ) },
+    /'Cache verified'/, 'verbose flag generates output on stderr';
+$cache.verbose = False;
+
+ok +$cache.tainted-files == 2, 'Found two files have been modified';
+
 $cache.update-cache;
+nok +$cache.failures.keys, 'Both pod files are correct';
+
+ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 
 done-testing;

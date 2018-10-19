@@ -73,13 +73,13 @@ for $cache.files -> $filename, %info {
 has Str $!path = 'pod-cache';
 has Str $!source = 'doc';
 has @!extensions = <pod pod6>;
-has Bool $verbose = True;
+has Bool $.verbose is rw;
 has $!precomp;
 has $!precomp-store;
 has %.files;
 has @!pods;
 
-submethod BUILD( :$!source, :$!path) {
+submethod BUILD( :$!source, :$!path, :$!verbose = True) {
     self.verify-source;
     self.verify-cache;
 }
@@ -110,14 +110,23 @@ method verify-cache {
             %!files{$pod-name}<status> = 'Tainted';
         }
     }
+    note 'Cache verified' if $!verbose;
 }
 
 method update-cache {
     for %!files.kv -> $pod-name, %info {
         next if %info<status> ~~ <OK Updated>;
         note "Processing $pod-name" if $!verbose;
-        $!precomp.precompile(%info<path>, %info<cache-key>, :force);
-        my $handle = $!precomp.load(%info<cache-key>)[0];
+        my $handle;
+        try {
+            $!precomp.precompile(%info<path>, %info<cache-key>, :force);
+            $handle = $!precomp.load(%info<cache-key>)[0];
+            CATCH {
+                default {
+                    %!files{$pod-name}<error> = .Str;
+                }
+            }
+        }
         with $handle {
             %!files{$pod-name}<status handle> = 'Updated', $handle ;
         }
@@ -144,4 +153,17 @@ method get-pods {
 method pod( Str $filename ) {
     return (note "$filename status is " ~ %!files{$filename}<status>) if %!files{$filename}<status> ~~ <Failed Tainted>;
     nqp::atkey(%!files{$filename}<handle>.unit,'$=pod')[0];
+}
+
+method failures {
+    gather for %!files.kv -> $pname, %info {
+        next unless %info<status> eq 'Failed';
+        take $pname => (%info<error> // 'no error given');
+    }.hash
+}
+
+method tainted-files {
+    gather for %!files.kv -> $pname, %info {
+        take $pname if %info<status> eq 'Tainted'
+    }
 }
