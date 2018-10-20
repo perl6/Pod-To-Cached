@@ -21,7 +21,7 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>) },
 $cache = Nil;
 mktree 't/tmp/doc';
 throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>)},
-    Exception, :message(/'No pod files found under'/), 'Detects absence of source files';
+    Exception, :message(/'No POD files found under'/), 'Detects absence of source files';
 
 $cache = Nil;
 't/tmp/doc/a-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
