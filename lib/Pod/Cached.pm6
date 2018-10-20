@@ -81,8 +81,8 @@ has %.files;
 has @!pods;
 
 submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = True) {
-    my $threads = %*ENV<THREADS>.?Int // 1;
-    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+#    my $threads = %*ENV<THREADS>.?Int // 1;
+#    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     self.verify-source;
     mktree $!path unless $!path.IO ~~ :d;
     self.verify-cache;
