@@ -15,6 +15,7 @@
     "test-depends" : [
         "Test",
         "Test::Output",
+	"JSON::Fast",
         "File::Directory::Tree"
     ],
     "source-type" : "git",
