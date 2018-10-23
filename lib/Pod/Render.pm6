@@ -9,7 +9,7 @@ unit class Pod::Render;
 =begin pod
 =TITLE Rendering pod
 
-This module provide functionality to take precompiled pod and generate
+This module provides functionality to take a precompiled pod and generate
 output based on templates. The default templates are for html and for a separate
 HTML file for each source pod.
 

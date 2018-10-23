@@ -9,10 +9,10 @@ use JSON::Fast;
 
 =TITLE Pod::Cached
 
-=SUBTITLE Create a precompiled cache of pod files
+=SUBTITLE Create a precompiled cache of POD files
 
-Module to take a collection of pod files and create a precompiled cache. Methods / functions
-to add a pod file to a cache.
+Module to take a collection of POD files and create a precompiled cache. Methods / functions
+to add a POD file to a cache.
 
 =begin SYNOPSIS
 use Pod::Cached;
@@ -23,10 +23,10 @@ $cache.update-cache;
 
 for $cache.files -> $filename, %info {
     given %info<status> {
-        when 'OK' {say "$filename has valid cached pod"}
-        when 'Updated' {say "$filename has valid pod, just updated"}
+        when 'OK' {say "$filename has valid cached POD"}
+        when 'Updated' {say "$filename has valid POD, just updated"}
         when 'Tainted' {say "$filename has been modified since the cache was last updated"}
-        when 'Failed' {say "$filename has been modified, but contains invalid pod"}
+        when 'Failed' {say "$filename has been modified, but contains invalid POD"}
     }
     some-routine-for-processing pod( $cache.pod( $filename ) );
 }
@@ -41,7 +41,7 @@ for $cache.files -> $filename, %info {
     path to the collection of pod files
 
 =item @!extensions = <pod pod6>
-    the possible extensions for a pod file
+    the possible extensions for a POD file
 
 =item verbose = True
     Whether processing information is sent to stderr.
@@ -49,7 +49,7 @@ for $cache.files -> $filename, %info {
 =item new
     Instantiates class. On instantiation, the module verifies that
         - the source directory exists
-        - the source directory contains pod/pod6 etc files (recursively)
+        - the source directory contains POD/POD6 etc files (recursively)
         - no duplicate filenames exist
         - the status (OK/Tainted) of the cache
 
@@ -63,11 +63,11 @@ for $cache.files -> $filename, %info {
         -C<status> One of 'OK', 'Tainted', 'Updated', 'Failed'
         - C<cache-key> the key needed to access the compunit cache
         - C<handle> the cache handle
-        - C<path> the path to the pod file
+        - C<path> the path to the POD file
 
 =item pod
     method pod(Str $filename:D )
-    Returns the Pod Object Module generated from the file with the filename.
+    Returns the POD Object Module generated from the file with the filename.
 
 =end pod
 
@@ -81,8 +81,8 @@ has %.files;
 has @!pods;
 
 submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = True) {
-    my $threads = %*ENV<THREADS>.?Int // 1;
-    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+#    my $threads = %*ENV<THREADS>.?Int // 1;
+#    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     self.verify-source;
     mktree $!path unless $!path.IO ~~ :d;
     self.verify-cache;
@@ -90,7 +90,7 @@ submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = True) {
 
 method verify-source {
     die "$!source is not a directory" unless $!source.IO ~~ :d;
-    die "No pod files found under $!source" unless +self.get-pods > 0;
+    die "No POD files found under $!source" unless +self.get-pods > 0;
     for @!pods -> $pfile {
         my $nm = $!source eq "." ?? $pfile !! $pfile.substr($!source.chars + 1); # name from source root directory
         $nm = $nm.subst(/ \. \w+ $/, ''); #remove any extension
