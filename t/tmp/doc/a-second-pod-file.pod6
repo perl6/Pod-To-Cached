@@ -1,0 +1,6 @@
+=begin pod
+=TITLE More and more
+
+Some more text
+
+=end pod

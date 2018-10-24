@@ -1,1 +1,14 @@
- 
+{
+  "files": {
+    "a-pod-file": {
+      "status": 3,
+      "cache-key": "CAF63EB3B7B34CD66EA99CEFCA7D330DB9F82482"
+    },
+    "a-second-pod-file": {
+      "status": 3,
+      "cache-key": "7D958C7DCEA4FA8DAFCB15ACD1776A669FB0AB4C"
+    }
+  },
+  "frozen": false,
+  "source": "t/tmp/doc"
+}

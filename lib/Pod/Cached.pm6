@@ -49,7 +49,7 @@ $cache.unfreeze;
 
 =end SYNOPSIS
 
-=item Str $!path = 'pod-cache'
+=item Str $!path = '.pod6-cache'
     path to the directory where the cache will be created/kept
 
 =item Str $!source = 'doc'
@@ -84,15 +84,16 @@ $cache.unfreeze;
 =item pod
     method pod(Str $filename, :$when-tainted='none', :$when-absent='note-exit', :when-failed = 'note')
     Returns the POD Object Module generated from the file with the filename.
-    The behaviour of pod can be changed for 'tainted', 'absent' and 'failed'.
+    The behaviour of pod can be changed for 'tainted', 'absent' and 'failed', eg :when-absent='none'.
     'note' issues an error on stderr
     'exit' stops the program at that point
     'none' ignores the pod-name silently
 
 =end pod
 constant INDEX = 'file-index.json';
+enum Status <OK Tainted Updated Failed Absent>;
 
-has Str $.path = 'pod-cache';
+has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
 has @.extensions = <pod pod6>;
 has Bool $.verbose is rw;
@@ -169,7 +170,7 @@ method verify-cache {
             %!files{$pod-name}<status handle> = 'OK', $handle ;
         }
         else {
-            %!files{$pod-name}<status> = $!frozen ?? 'Absent' !! 'Tainted' ;
+            %!files{$pod-name}<status> = $!frozen ?? Absent !! Tainted ;
         }
     }
     note 'Cache verified' if $!verbose;
@@ -182,7 +183,7 @@ method update-cache {
         return
     }
     for %!files.kv -> $pod-name, %info {
-        next if %info<status> ~~ <OK Updated>;
+        next if %info<status> ~~ any( OK, Updated );
         note "Processing $pod-name" if $!verbose;
         my $handle;
         try {
@@ -195,10 +196,10 @@ method update-cache {
             }
         }
         with $handle {
-            %!files{$pod-name}<status> = 'Updated', $handle ;
+            %!files{$pod-name}<status> = Updated , $handle ;
         }
         else {
-            %!files{$pod-name}<status> = 'Failed';
+            %!files{$pod-name}<status> = Failed;
             note "$pod-name failed to compile" if $!verbose;
         }
     }
@@ -231,9 +232,9 @@ method get-pods {
 }
 
 method pod( Str $filename,
-                    :$behaviour-failed = 'note',
-                    :$behaviour-tainted = 'none',
-                    :$behaviour-absent = 'note-exit'
+                    :$when-failed = 'note',
+                    :$when-tainted = 'none',
+                    :$when-absent = 'note-exit'
                      ) {
     die 'Cannot provide POD without updated or valid repository'
         unless $!cache-verified;
@@ -257,15 +258,15 @@ method pod( Str $filename,
 
     given %!files{$filename}<status> {
         when 'Failed' {
-            return if act-on($filename, $behaviour-failed,
+            return if act-on($filename, $when-failed,
                 'failed to compile with error: ' ~ %!files<error>)
         }
         when 'Tainted' {
-            return if act-on($filename, $behaviour-tainted,
+            return if act-on($filename, $when-tainted,
                 'source pod has been modified')
         }
         when 'Absent' { # this one is generated in verify-cache
-            return if act-on($filename, $behaviour-absent,
+            return if act-on($filename, $when-absent,
                 'not in document cache')
         }
     }
@@ -274,13 +275,13 @@ method pod( Str $filename,
 
 method failures {
     gather for %!files.kv -> $pname, %info {
-        next unless %info<status> eq 'Failed';
+        next unless %info<status> ~~ Failed;
         take $pname => (%info<error> // 'no error given');
     }.hash
 }
 
 method tainted-files {
     gather for %!files.kv -> $pname, %info {
-        take $pname if %info<status> eq 'Tainted'
+        take $pname if %info<status> ~~ Tainted
     }
 }

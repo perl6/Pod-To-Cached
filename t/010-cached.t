@@ -85,6 +85,7 @@ is +$cache.tainted-files,  2, 'Neither of the pod files are in the cache';
 
 #--MARKER-- Test 11
 lives-ok {$cache.update-cache}, 'Updates cache without dying';
+
 #--MARKER-- Test 12
 is +$cache.failures.keys, 2, 'Both pod files contain errors';
 
@@ -109,6 +110,8 @@ $cache = Nil;
 
 # turn on verbose
 #--MARKER-- Test 13
+=begin out
+
 stderr-like {$cache = Pod::Cached.new(:source<t/tmp/doc>, :path<t/tmp/ref>, :verbose ) },
     /'Cache verified'/, 'verbose flag generates output on stderr';
 $cache.verbose = False;
@@ -122,5 +125,7 @@ nok +$cache.failures.keys, 'Both pod files are correct';
 
 #--MARKER-- Test 16
 ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
+
+=end out
 
 done-testing;
