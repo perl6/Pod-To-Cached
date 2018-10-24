@@ -11,11 +11,14 @@
     "support" : {
         "source" : "https://github.com/finanalyst/pod-cached"
     },
-    "depends" : [ "File::Directory::Tree" ],
+    "depends" : [
+        "File::Directory::Tree",
+        "JSON::Fast"
+        ],
     "test-depends" : [
         "Test",
         "Test::Output",
-	"JSON::Fast",
+        "JSON::Fast",
         "File::Directory::Tree"
     ],
     "source-type" : "git",
