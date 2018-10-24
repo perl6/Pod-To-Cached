@@ -27,10 +27,25 @@ for $cache.files -> $filename, %info {
         when 'Updated' {say "$filename has valid POD, just updated"}
         when 'Tainted' {say "$filename has been modified since the cache was last updated"}
         when 'Failed' {say "$filename has been modified, but contains invalid POD"}
+        when 'Absent' {say "$filename is not in pod-cache"}
     }
     some-routine-for-processing pod( $cache.pod( $filename ) );
 }
 
+# Remove the dependence on the pod source
+# This means that the pod-cache can be copied without the original pod-files.
+# update will generate an error with verbose
+$cache.freeze;
+
+# Find files with compile errors
+say 'These pod files have errors:';
+for $cache.errors.kv -> $fn, $err { say "$fn has error <$err>"}
+
+# List Tainted files
+.say for $cache.tainted-files;
+
+# For completeness
+$cache.unfreeze;
 
 =end SYNOPSIS
 
@@ -39,6 +54,7 @@ for $cache.files -> $filename, %info {
 
 =item Str $!source = 'doc'
     path to the collection of pod files
+    ignored if cache frozen
 
 =item @!extensions = <pod pod6>
     the possible extensions for a POD file
@@ -60,16 +76,21 @@ for $cache.files -> $filename, %info {
 =item files
     public attribute
     a hash of filenames with keys
-        -C<status> One of 'OK', 'Tainted', 'Updated', 'Failed'
+        -C<status> One of 'OK', 'Tainted', 'Updated', 'Failed', 'Absent'
         - C<cache-key> the key needed to access the compunit cache
         - C<handle> the cache handle
-        - C<path> the path to the POD file
+        - C<path> the path to the POD file, not set if cache frozen
 
 =item pod
-    method pod(Str $filename:D )
+    method pod(Str $filename, :$when-tainted='none', :$when-absent='note-exit', :when-failed = 'note')
     Returns the POD Object Module generated from the file with the filename.
+    The behaviour of pod can be changed for 'tainted', 'absent' and 'failed'.
+    'note' issues an error on stderr
+    'exit' stops the program at that point
+    'none' ignores the pod-name silently
 
 =end pod
+constant INDEX = 'file-index.json';
 
 has Str $.path = 'pod-cache';
 has Str $.source = 'doc';
@@ -79,16 +100,47 @@ has $.precomp;
 has $.precomp-store;
 has %.files;
 has @!pods;
+has Bool $.cache-verified = False;
+has Bool $.frozen = False;
 
 submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = True) {
 #    my $threads = %*ENV<THREADS>.?Int // 1;
 #    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
-    self.verify-source;
-    mktree $!path unless $!path.IO ~~ :d;
+    self.get-cache;
     self.verify-cache;
 }
 
+method get-cache {
+    if $!path.IO ~~ :d {
+        # cache path exists, so assume it should contain a cache
+        die '$!path appears to have corrupt cache' unless ("$!path/"~INDEX).IO ~~ :f;
+        my %config;
+        try {
+            %config = from-json(("$!path/"~INDEX).slurp);
+            CATCH {
+                default {
+                    die "Configuration failed with: " ~ .message;
+                }
+            }
+        }
+        $!frozen = %config<status>;
+        %!files = %config<files>;
+        $!source = %config<source> unless $!frozen;
+        self.verify-source;
+    }
+    else {
+        # check that a source exists before creating a cache
+        $!frozen = False;
+        self.verify-source;
+        mktree $!path;
+        self.save-index;
+    }
+    $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
+    $!precomp = CompUnit::PrecompilationRepository::Default.new(store => $!precomp-store);
+}
+
 method verify-source {
+    return if $!frozen;
     die "$!source is not a directory" unless $!source.IO ~~ :d;
     die "No POD files found under $!source" unless +self.get-pods > 0;
     for @!pods -> $pfile {
@@ -97,24 +149,38 @@ method verify-source {
         die "$nm already exists but with a different extension" if %!files{$nm}:exists;
         %!files{$nm} = (:cache-key(nqp::sha1($nm)), :path($pfile.IO)).hash;
     }
+    =comment out
+        for pod files that remain unchanged in name, the %!files entry will be changed
+        for pod files that change their name, the cache will continue to contain old content
+        TODO check whether any files in index are not in doc-set, and remove from cache
+
 }
 
 method verify-cache {
-    $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
-    $!precomp = CompUnit::PrecompilationRepository::Default.new(store => $!precomp-store);
     for %!files.kv -> $pod-name, %info {
-        my $handle = $!precomp.load(%info<cache-key>, :since(%info<path>.modified))[0];
+        my $handle;
+        if $!frozen {
+            $handle = $!precomp.load(%info<cache-key>)[0];
+        }
+        else {
+            $handle = $!precomp.load(%info<cache-key>, :since(%info<path>.modified))[0];
+        }
         with $handle {
             %!files{$pod-name}<status handle> = 'OK', $handle ;
         }
         else {
-            %!files{$pod-name}<status> = 'Tainted';
+            %!files{$pod-name}<status> = $!frozen ?? 'Absent' !! 'Tainted' ;
         }
     }
     note 'Cache verified' if $!verbose;
+    $!cache-verified = True;
 }
 
 method update-cache {
+    if $!frozen {
+        note 'Cannot update frozen cache' if $!verbose;
+        return
+    }
     for %!files.kv -> $pod-name, %info {
         next if %info<status> ~~ <OK Updated>;
         note "Processing $pod-name" if $!verbose;
@@ -129,7 +195,7 @@ method update-cache {
             }
         }
         with $handle {
-            %!files{$pod-name}<status handle> = 'Updated', $handle ;
+            %!files{$pod-name}<status> = 'Updated', $handle ;
         }
         else {
             %!files{$pod-name}<status> = 'Failed';
@@ -140,14 +206,15 @@ method update-cache {
 }
 
 method save-index {
-    my %h = gather for %!files.kv -> $fn, %inf {
-        take $fn => (
-            :cache-key(%inf<cache-key>),
-            :status(%inf<status>),
-
-            ).hash
-    };
-    "$!path/file-index.json".IO.spurt: to-json(%h);
+    my %h = :frozen( $!frozen ), :files( (
+        gather for %!files.kv -> $fn, %inf {
+            take $fn => (
+                :cache-key( %inf<cache-key>),
+                :status( %inf<status>)
+                ).hash
+        } ).hash );
+    %h<source> = $!source unless $!frozen;
+    ("$!path/"~INDEX).IO.spurt: to-json(%h);
 }
 
 method get-pods {
@@ -163,8 +230,45 @@ method get-pods {
      }($!source)
 }
 
-method pod( Str $filename ) {
-    return (note "$filename status is " ~ %!files{$filename}<status>) if %!files{$filename}<status> ~~ <Failed Tainted>;
+method pod( Str $filename,
+                    :$behaviour-failed = 'note',
+                    :$behaviour-tainted = 'none',
+                    :$behaviour-absent = 'note-exit'
+                     ) {
+    die 'Cannot provide POD without updated or valid repository'
+        unless $!cache-verified;
+    sub act-on(Str:D $filename, $behaviour, $message --> Bool) {
+        my Bool $rv;
+        given $behaviour {
+            when m/'note'/ {
+                note "$filename: $message";
+                $rv = False; # unless 'note exit' given response required
+                proceed
+            }
+            when m/'none'/ { $rv = True } # No response required
+            when m/'exit'/ { $rv = True } # exit from module
+            default {
+                note "$filename: $message";
+                $rv = True
+            } # like note-exit
+        }
+        $rv
+    }
+
+    given %!files{$filename}<status> {
+        when 'Failed' {
+            return if act-on($filename, $behaviour-failed,
+                'failed to compile with error: ' ~ %!files<error>)
+        }
+        when 'Tainted' {
+            return if act-on($filename, $behaviour-tainted,
+                'source pod has been modified')
+        }
+        when 'Absent' { # this one is generated in verify-cache
+            return if act-on($filename, $behaviour-absent,
+                'not in document cache')
+        }
+    }
     nqp::atkey(%!files{$filename}<handle>.unit,'$=pod')[0];
 }
 
