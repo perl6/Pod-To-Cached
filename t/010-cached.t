@@ -72,7 +72,20 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>) },
 ('t/tmp/ref/' ~ INDEX).IO.spurt(q:to/CONTENT/);
         {
             "frozen": "False",
-            "files": { "one": "ONE", "two": "TWO" }
+            "files": {
+                "one": {
+                    "cache-key": "ONE",
+                    "added": 10,
+                    "path": "some/path",
+                    "status": "Valid"
+                },
+                 "two": {
+                     "cache-key": "TWO",
+                     "added": 10,
+                     "path": "some/path",
+                     "status": "Valid"
+                 }
+             }
         }
     CONTENT
 #--MARKER-- Test 7
@@ -82,7 +95,20 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>) },
 ('t/tmp/ref/' ~ INDEX).IO.spurt(q:to/CONTENT/);
         {
             "frozen": "False",
-            "files": { "one": "ONE", "two": "TWO" },
+            "files": {
+                "one": {
+                    "cache-key": "ONE",
+                    "added": 10,
+                    "path": "some/path",
+                    "status": "Valid"
+                },
+                 "two": {
+                     "cache-key": "TWO",
+                     "added": 10,
+                     "path": "some/path",
+                     "status": "Valid"
+                 }
+             },
             "source": "t/tmp/doc"
         }
     CONTENT
@@ -131,7 +157,7 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>)},
 
 #--MARKER-- Test 11
 throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>)},
-    Exception, :message(/'More than one POD file named'/), 'Detects duplication of source file names';
+    Exception, :message(/'duplicates name of'/), 'Detects duplication of source file names';
 
 't/tmp/doc/a-second-pod-file.pod'.IO.unlink ;
 #--MARKER-- Test 12
@@ -155,32 +181,35 @@ ok (%config<files>:exists
 is +%config<files>.keys, 2, 'Two pod files in index';
 
 #--MARKER-- Test 20
-is +$cache.list-files( Pod::Cached::New ),  2, 'Both pod files are marked as New to cache';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'New', 'a-second-pod-file'=>'New').hash, 'expected value of list-files :all';
 #--MARKER-- Test 21
-is +gather for %config<files>.kv -> $pname, %info {
-    take $pname if %info<status> ~~ Pod::Cached::New.Str
-}, 2, 'Index matches object about files';
+is-deeply $cache.list-files( Pod::Cached::New ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
+#--MARKER-- Test 22
+is-deeply (gather for %config<files>.kv -> $pname, %info {
+    take $pname if %info<status> ~~ Pod::Cached::New
+}).sort, $cache.list-files( Pod::Cached::New ).sort, 'Index matches object about files';
 
 my $mod-time = ('t/tmp/ref/' ~ INDEX).IO.modified;
 my $rv;
-#--MARKER-- Test 22
-lives-ok {$rv = $cache.update-cache}, 'Updates cache without dying';
 #--MARKER-- Test 23
-nok $rv, 'Returned false because of compile errors';
+lives-ok {$rv = $cache.update-cache}, 'Updates cache without dying';
 #--MARKER-- Test 24
-like $cache.error-messages[0], /'Compile error in'/, 'Error messages saved';
+nok $rv, 'Returned false because of compile errors';
 #--MARKER-- Test 25
-nok ('t/tmp/ref/' ~ INDEX).IO.modified > $mod-time, 'INDEX not modified';
+like $cache.error-messages[0], /'Compile error in'/, 'Error messages saved';
 #--MARKER-- Test 26
-is +$cache.list-files( Pod::Cached::Failed ), 2, 'Both pod files contain errors';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Failed', 'a-second-pod-file'=>'Failed').hash, 'lists Failed files';
 #--MARKER-- Test 27
+nok ('t/tmp/ref/' ~ INDEX).IO.modified > $mod-time, 'INDEX not modified';
+#--MARKER-- Test 28
 is +gather for $cache.files.kv -> $nm, %inf { take 'f' unless %inf<handle>:exists },
     2, 'No handles are defined for New & Failed files';
 
 $cache.verbose = True;
-#--MARKER-- Test 28
+#--MARKER-- Test 29
 stderr-like { $cache.update-cache }, /'Cache not fully updated'/, 'Got correct progress message';
 $cache.verbose = False;
+
 't/tmp/doc/a-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
     =begin pod
     =TITLE This is a title
@@ -199,17 +228,14 @@ $cache.verbose = False;
     =end pod
     POD-CONTENT
 
-#--MARKER-- Test 29
+#--MARKER-- Test 30
 ok $cache.update-cache, 'Returned true because both POD now compile';
 
-#--MARKER-- Test 30
-is +$cache.list-files( Pod::Cached::Updated ), 2, 'Two files have been modified';
-
 #--MARKER-- Test 31
-ok ('t/tmp/ref/' ~ INDEX).IO.modified > $mod-time, 'INDEX has been modified';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Updated', 'a-second-pod-file'=>'Updated').hash, 'list-files shows two pod Updated';
 
 #--MARKER-- Test 32
-ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
+ok ('t/tmp/ref/' ~ INDEX).IO.modified > $mod-time, 'INDEX has been modified because update cache ok';
 
 't/tmp/doc/a-second-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
     =begin pod
@@ -219,51 +245,68 @@ ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 
     =end pod
     POD-CONTENT
-%config = from-json(('t/tmp/ref/' ~ INDEX).IO.slurp);
-dd %config;
+$cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>);
 #--MARKER-- Test 33
-lives-ok {$cache .=new(:path<t/tmp/ref>, :verbose)}, 'with a valid cache, source can be omitted';
-dd $cache.list-files( :all );
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One tainted, one updated';
+$cache.update-cache;
 #--MARKER-- Test 34
-is +$cache.list-files( Pod::Cached::Tainted ), 1, 'A pod file identified as needing updating';
-#--MARKER-- Test 35
-is +$cache.list-files( :all ).keys, 2, 'One Updated, one Valid';
-#--MARKER-- Test 36
-is +$cache.list-files( Pod::Cached::Valid ), 1, 'Yep, valid';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Updated').hash, 'Both updated';
 
-=begin out
+#--MARKER-- Test 35
+lives-ok {$cache .=new(:path<t/tmp/ref>)}, 'with a valid cache, source can be omitted';
+#--MARKER-- Test 36
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Valid').hash, 'Both Valid, not Updated because new instantiation of Pod::Cached';
+
+diag 'test pod extraction';
 #--MARKER-- Test 37
+ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
+
+
+'t/tmp/doc/a-second-pod-file.pod6'.IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE More and more
+
+    Some more text but now it is changed, and again
+
+    =end pod
+    POD-CONTENT
+
+$cache .=new(:path<t/tmp/ref>);
+#--MARKER-- Test 38
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One Valid, not Updated because new instantiation of Pod::Cached, one Tainted';
+#--MARKER-- Test 39
 throws-like { $cache.pod('a-second-pod-file', :when-tainted('exit')) }, Exception,
     :message(/ 'POD called with exit processing'/), 'Pod should fail if tainted behaviour exit';
-#--MARKER-- Test 38
-is $cache.pod('a-second-pod-file', :when-tainted('none')), Nil, 'Nil return for none';
-#--MARKER-- Test 39
-stderr-like { $rv = $cache.pod('a-second-pod-file', :when-tainted('note')) }, /'source pod has been modified'/, 'An error message when note';
 #--MARKER-- Test 40
-is $rv, Pod::Block::Named, 'pod supplies output for note because previous version still in cache';
+is $cache.pod('a-second-pod-file', :when-tainted('none')), Nil, 'Nil return for none';
+
 #--MARKER-- Test 41
-stderr-like {$rv = $cache.pod('a-second-pod-file', :when-tainted('note-none'))}, /'source pod has been modified'/, 'Same error message when note-none';
+stderr-like { $rv = $cache.pod('a-second-pod-file', :when-tainted('note')) }, /'source pod has been modified'/, 'An error message when note';
 #--MARKER-- Test 42
-is $rv, Nil, 'produces a note, but no POD';
+ok $rv ~~ Pod::Block::Named, 'pod supplies output for note because previous version still in cache';
+#--MARKER-- Test 43
+stderr-like {$rv = $cache.pod('a-second-pod-file', :when-tainted('note-none'))}, /'source pod has been modified'/, 'Same error message when note-none';
+#--MARKER-- Test 44
+nok $rv, 'produces a note, but no POD';
 
 diag 'testing freeze';
-#--MARKER-- Test 43
+#--MARKER-- Test 45
 throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because the following'/), 'Cant freeze when a file is tainted';
 
-#--MARKER-- Test 44
+#--MARKER-- Test 46
 ok $cache.update-cache, 'updates without problem';
 
-#--MARKER-- Test 45
+#--MARKER-- Test 47
 lives-ok { $cache.freeze }, 'All updated so now can freeze';
 
 rmtree 't/tmp/doc';
-#--MARKER-- Test 46
-lives-ok { $cache .=new('t/tmp/ref') }, 'Gets a frozen cache without source';
+#--MARKER-- Test 48
+lives-ok { $cache .=new(:path('t/tmp/ref')) }, 'Gets a frozen cache without source';
 
-#--MARKER-- Test 47
+#--MARKER-- Test 49
 throws-like { $cache.update-cache }, Exception, :message(/ 'Cannot update frozen cache'/), 'No updating on a frozen cache';
 
-#--MARKER-- Test 48
-throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'Cannot provide POD without valid cache'/), 'Cannot get POD for invalid filename';
-=end out
+#--MARKER-- Test 50
+throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'No such filename in cache'/), 'Cannot get POD for invalid filename';
+
 done-testing;

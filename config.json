@@ -1,0 +1,12 @@
+{
+  "one": {
+    "status": 0,
+    "key": "this is a random key",
+    "path": "some/path"
+  },
+  "two": {
+    "status": 1,
+    "key": "k",
+    "path": "another/one"
+  }
+}

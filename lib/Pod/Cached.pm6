@@ -80,17 +80,17 @@ $cache.freeze;
     returns an Sequence of files with the given status
 
 =item pod
-    method pod(Str $filename, :$when-tainted='none', :$when-absent='note-exit', :when-failed = 'note')
+    method pod(Str $filename, :$when-tainted='none', :when-failed = 'note')
     Returns the POD Object Module generated from the file with the filename.
     When a doc-set is being actively updated, then pod files may be tainted, or failed, and the user may wish
     to choose how to handle them.
     In a frozen cache, all files have valid status
     The behaviour of pod can be changed for 'tainted' or 'failed', eg :when-failed='allow'
         Caution: allowing a failed file uses pod in cache, but will die if the pod is new and failed.
-    'note' issues an error on stderr
-    'allow' provides pod, no note
-    'exit' stops the program at that point
-    'none' ignores the pod-name silently
+        'note' issues an error on stderr
+        'allow' provides pod, no note
+        'exit' stops the program at that point
+        'none' ignores the pod-name silently
 
 =end pod
 
@@ -105,7 +105,6 @@ has $.precomp;
 has $.precomp-store;
 has %.files;
 has @!pods;
-has Bool $.cache-verified = False;
 has Bool $.frozen = False;
 has Str @.error-messages;
 
@@ -113,8 +112,6 @@ submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = False) {
 #    my $threads = %*ENV<THREADS>.?Int // 1;
 #    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     self.get-cache;
-    die "Cache verification failed with:\n" ~ @!error-messages.join("\n\t")
-        unless self.verify-cache;
 }
 
 method get-cache {
@@ -141,7 +138,8 @@ method get-cache {
         unless $!frozen {
             die "Invalid index file"
                 unless %config<source>:exists;
-            $!source = %config<source>
+            $!source = %config<source>;
+            %!files.map( { .value<status> = Status(.value<status> ) ; .value<added> = DateTime.new( .value<added> ).Instant })
         }
         die "Source verification failed with:\n" ~ @!error-messages.join("\n\t")
             unless self.verify-source; # note a frozen cache always returns True
@@ -156,6 +154,13 @@ method get-cache {
     }
     $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
     $!precomp = CompUnit::PrecompilationRepository::Default.new(store => $!precomp-store);
+    # get handles for all Valid / Tainted files
+
+    for %!files.kv -> $nm, %info {
+        next unless %info<status> ~~ any(Valid, Tainted);
+        die "No handle for <$nm> in cache, but marked as existing. Cache corrupted."
+            without %!files{$nm}<handle> = $!precomp.load(%info<cache-key>)[0];
+    }
     note "Got cache at $!path" if $!verbose;
 }
 
@@ -166,19 +171,33 @@ method verify-source( --> Bool ) {
     (@!error-messages = "No POD files found under $!source", ) and return False
         unless +self.get-pods > 0;
     my $rv = True;
-    %!files = (); # rewrite files from source
     for @!pods -> $pfile {
         my $nm = $!source eq "." ?? $pfile !! $pfile.substr($!source.chars + 1); # name from source root directory
         $nm = $nm.subst(/ \. \w+ $/, ''); #remove any extension
         if %!files{$nm}:exists {
-            @!error-messages.push("More than one POD file named <$nm> but different extensions found under $!source");
-            $rv = False ;
-            %!files{$nm}<cache-key path> = '','';
+            if %!files{$nm}<path> eq $pfile {
+                # change an Updated status to Valid because re-initialising
+                %!files{$nm}<status> = Valid if %!files{$nm}<status> ~~ Updated;
+                # detect Tainted
+                %!files{$nm}<status> = Tainted if %!files{$nm}<added> < %!files{$nm}<path>.IO.modified;
+            }
+            else {
+                @!error-messages.push("$pfile duplicates name of " ~ %!files{$nm}<path> ~ " but with different extension");
+                $rv = False ;
+            }
         }
         else {
-            %!files{$nm} = (:cache-key(nqp::sha1($nm)), :path($pfile.IO), :status( New )).hash;
+            %!files{$nm} = (:cache-key(nqp::sha1($nm)), :path($pfile), :status( New ), :added(0) ).hash;
         }
     }
+    =comment out garbage collection
+    my Set $garbage = Set.new( @!pods ) (-) Set.new( %!files.keys) ;
+    if $garbage.elems {
+        @!error-messages.push("Cache contains the following pod not in source\n" ~ $garbage);
+        $rv = False;
+    }
+     $!precomp-store.remove-from-cache(CompUnit::PrecompilationId $precomp-id)
+
     =comment ary
         for pod files that remain unchanged in name, the %!files entry will be changed.
         but for pod files that change their name, the cache will continue to contain old content
@@ -186,39 +205,6 @@ method verify-source( --> Bool ) {
 
     note 'Source verified' if $!verbose;
     $rv
-}
-
-method verify-cache( --> Bool ) {
-    my $rv = True;
-    @!error-messages = ();
-    for %!files.kv -> $pod-name, %info {
-        my $handle;
-        $handle = $!precomp.load(%info<cache-key>)[0];
-        with $handle {
-            %!files{$pod-name}<status handle> = Valid, $handle;
-        }
-        else {
-            %!files{$pod-name}<status> = New;
-        }
-        say "in verify $pod-name status is " ~ %!files{$pod-name}<status>;
-        if $!frozen {
-            if %!files{$pod-name}<status> == New {
-                $rv = False;
-                @!error-messages.push: "$pod-name is not in frozen cache"
-            }
-        }
-        else { say 'looking with modified';
-            # for an actively maintained doc-set, we need to trap whether pod is updated
-            $handle = $!precomp.load(%info<cache-key>, :since(%info<path>.modified))[0];
-            without $handle {
-                # the previous handle remains when Tainted, no handle when New
-                %!files{$pod-name}<status> = Tainted unless %!files{$pod-name}<status> == New
-            }
-        }
-        say "2 in verify $pod-name status is " ~ %!files{$pod-name}<status>;
-    }
-    note 'Cache ' ~ ($rv ?? '' !! 'not ') ~ 'verified' if $!verbose;
-    $!cache-verified = $rv;
 }
 
 method update-cache( --> Bool ) {
@@ -233,7 +219,7 @@ method update-cache( --> Bool ) {
         note "Processing $pod-name" if $!verbose;
         my $handle;
         try {
-            $!precomp.precompile(%info<path>, %info<cache-key>, :force);
+            $!precomp.precompile(%info<path>.IO, %info<cache-key>, :force);
             $handle = $!precomp.load(%info<cache-key>)[0];
             CATCH {
                 default {
@@ -243,7 +229,7 @@ method update-cache( --> Bool ) {
             }
         }
         with $handle {
-            %!files{$pod-name}<status handle> = Updated , $handle ;
+            %!files{$pod-name}<status handle added> = Updated , $handle, now ;
         }
         else {
             %!files{$pod-name}<status> = Failed;
@@ -260,10 +246,19 @@ method update-cache( --> Bool ) {
 method save-index {
     my %h = :frozen( $!frozen ), :files( (
         gather for %!files.kv -> $fn, %inf {
-            take $fn => (
-                :cache-key(%inf<cache-key>),
-                :status( $!frozen ?? Valid.Str !! %inf<status>.Str )
+            if $!frozen {
+                take $fn => (
+                    :cache-key(%inf<cache-key>)
                 ).hash
+            }
+            else {
+                take $fn => (
+                    :cache-key(%inf<cache-key>),
+                    :status( %inf<status> ),
+                    :added( %inf<added> ),
+                    :path(%inf<path>)
+                ).hash
+            }
         } ).hash );
     %h<source> = $!source unless $!frozen;
     ("$!path/"~INDEX).IO.spurt: to-json(%h);
@@ -287,24 +282,23 @@ method pod( Str $filename,
                     :$when-failed = 'note-none', # provide a note, do not supply Pod from cache
                     :$when-tainted = 'allow' # no not, but supply POD (old cache value)
                      ) {
-    die 'Cannot provide POD without valid cache'
-        unless $!cache-verified;
     die 'No such filename in cache' unless $filename ~~ any(%!files.keys);
     sub act-on(Str:D $filename, $behaviour, $message --> Bool) {
         my Bool $rv;
         given $behaviour {
-            when 'allow' { $rv = False } # no note, and supply POD
-            when 'note' {
+            when / 'allow' / { $rv = False } # no note, and supply POD
+            when / 'note' / {
                 note "$filename: $message";
                 $rv = False; # unless 'note-none' POD is returned
                 proceed
             }
-            when 'none' { $rv = True } # No POD returned
-            when 'exit' {
-                die "POD called with $behaviour processing $filename"
+            when / 'none'/ { $rv = True } # No POD returned
+            when / 'exit' / {
+                die "POD called with $behaviour processing <$filename>"
             }
+            when / 'note' / {} # test none/exit but do not go to default
             default {
-                die "Unknown behaviour $behaviour processing $filename"
+                die "Unknown behaviour $behaviour processing <$filename>"
             }
         }
         $rv
@@ -322,7 +316,7 @@ method pod( Str $filename,
     }
     =comment Getting here means that the user want to take pod from the cache
 
-    die "Attempt to obtain non-existent POD for $filename. Is the source New and Failed?"
+    die "Attempt to obtain non-existent POD for <$filename>. Is the source New and Failed?"
         without %!files{$filename}<handle>;
     nqp::atkey(%!files{$filename}<handle>.unit,'$=pod')[0];
 }
@@ -336,7 +330,7 @@ multi method list-files( Status $s ) {
 multi method list-files( Bool :$all --> Hash) {
     return unless $all;
     ( gather for %!files.kv -> $pname, %info {
-        take $pname => %info<status>
+        take $pname => %info<status>.Str
     }).hash
 }
 
