@@ -309,4 +309,5 @@ throws-like { $cache.update-cache }, Exception, :message(/ 'Cannot update frozen
 #--MARKER-- Test 50
 throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'No such filename in cache'/), 'Cannot get POD for invalid filename';
 
+rmtree 't/tmp';
 done-testing;
