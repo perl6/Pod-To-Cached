@@ -41,7 +41,7 @@ $cache.freeze;
 
 =end SYNOPSIS
 
-=item Str $!path = '.pod6-cache'
+=item Str $.path = '.pod6-cache'
     path to the directory where the cache will be created/kept
 
 =item Str $!source = 'doc'
