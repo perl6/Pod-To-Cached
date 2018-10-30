@@ -108,7 +108,7 @@ has @!pods;
 has Bool $.frozen = False;
 has Str @.error-messages;
 
-submethod BUILD( :$!source = 'doc', :$!path = 'pod-cache', :$!verbose = False) {
+submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False) {
 #    my $threads = %*ENV<THREADS>.?Int // 1;
 #    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
     self.get-cache;
@@ -248,7 +248,8 @@ method save-index {
         gather for %!files.kv -> $fn, %inf {
             if $!frozen {
                 take $fn => (
-                    :cache-key(%inf<cache-key>)
+                    :cache-key(%inf<cache-key>),
+                    :status( Valid )
                 ).hash
             }
             else {
@@ -335,6 +336,7 @@ multi method list-files( Bool :$all --> Hash) {
 }
 
 method freeze( --> Bool ) {
+    return if $!frozen;
     my @not-ok = gather for %!files.kv -> $pname, %info {
         take $pname unless %info<status> ~~ any(Valid, Updated )
     }
