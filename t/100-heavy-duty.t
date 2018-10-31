@@ -6,6 +6,10 @@ use Test::Output;
 use File::Directory::Tree;
 use Pod::Cached;
 
+diag 'Heavy duty test optional';
+done-testing;
+exit;
+
 if 't/tmp'.IO ~~ :d  {
     empty-directory 't/tmp';
 }
@@ -17,7 +21,7 @@ mktree 't/tmp/doc';
 # set up pod files
 constant DRY-RUN = 5;
 constant HEAVY-RUN = 256;
-constant TEST-FILE = 't/doctest/contexts.pod6';
+constant TEST-FILE = 't/doctest/community.pod6';
 
 my $text = TEST-FILE.IO.slurp;
 my Pod::Cached $cache;
