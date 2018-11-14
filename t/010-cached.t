@@ -8,9 +8,9 @@ use JSON::Fast;
 constant INDEX = 'file-index.json';
 
 #--MARKER-- Test 1
-use-ok 'Pod::Cached';
+use-ok 'Pod::To::Cached';
 
-use Pod::Cached;
+use Pod::To::Cached;
 
 if 't/tmp'.IO ~~ :d  {
     empty-directory 't/tmp';
@@ -19,7 +19,7 @@ else {
     mktree 't/tmp'
 }
 
-my Pod::Cached $cache;
+my Pod::To::Cached $cache;
 
 mktree 't/tmp/ref';
 
@@ -163,7 +163,7 @@ throws-like { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>)},
 #--MARKER-- Test 12
 nok 't/tmp/ref'.IO ~~ :d, 'No cache directory should be created yet';
 #--MARKER-- Test 13
-lives-ok { $cache = Pod::Cached.new(:source<t/tmp/doc>, :path<t/tmp/ref>, :!verbose) }, 'Instantiates OK';
+lives-ok { $cache .= new(:source<t/tmp/doc>, :path<t/tmp/ref>, :!verbose) }, 'Instantiates OK';
 #--MARKER-- Test 14
 ok 't/tmp/ref'.IO ~~ :d, 'Correctly creates the cache directory';
 #--MARKER-- Test 15
@@ -183,11 +183,11 @@ is +%config<files>.keys, 2, 'Two pod files in index';
 #--MARKER-- Test 20
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'New', 'a-second-pod-file'=>'New').hash, 'expected value of list-files :all';
 #--MARKER-- Test 21
-is-deeply $cache.list-files( Pod::Cached::New ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
+is-deeply $cache.list-files( Pod::To::Cached::New ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
 #--MARKER-- Test 22
 is-deeply (gather for %config<files>.kv -> $pname, %info {
-    take $pname if %info<status> ~~ Pod::Cached::New
-}).sort, $cache.list-files( Pod::Cached::New ).sort, 'Index matches object about files';
+    take $pname if %info<status> ~~ Pod::To::Cached::New
+}).sort, $cache.list-files( Pod::To::Cached::New ).sort, 'Index matches object about files';
 
 my $mod-time = ('t/tmp/ref/' ~ INDEX).IO.modified;
 my $rv;
@@ -255,7 +255,7 @@ is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-fi
 #--MARKER-- Test 35
 lives-ok {$cache .=new(:path<t/tmp/ref>)}, 'with a valid cache, source can be omitted';
 #--MARKER-- Test 36
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Valid').hash, 'Both Valid, not Updated because new instantiation of Pod::Cached';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Valid').hash, 'Both Valid, not Updated because new instantiation of Pod::To::Cached';
 
 diag 'test pod extraction';
 #--MARKER-- Test 37
@@ -273,7 +273,7 @@ ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 
 $cache .=new(:path<t/tmp/ref>);
 #--MARKER-- Test 38
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One Valid, not Updated because new instantiation of Pod::Cached, one Tainted';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One Valid, not Updated because new instantiation of Pod::To::Cached, one Tainted';
 #--MARKER-- Test 39
 throws-like { $cache.pod('a-second-pod-file', :when-tainted('exit')) }, Exception,
     :message(/ 'POD called with exit processing'/), 'Pod should fail if tainted behaviour exit';
@@ -307,7 +307,7 @@ lives-ok { $cache .=new(:path('t/tmp/ref')) }, 'Gets a frozen cache without sour
 throws-like { $cache.update-cache }, Exception, :message(/ 'Cannot update frozen cache'/), 'No updating on a frozen cache';
 
 #--MARKER-- Test 50
-throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'No such filename in cache'/), 'Cannot get POD for invalid filename';
+throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'Filename <' \w+ '> not in cache'/), 'Cannot get POD for invalid filename';
 
 rmtree 't/tmp';
 done-testing;

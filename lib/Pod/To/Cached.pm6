@@ -1,4 +1,4 @@
-unit class Pod::Cached;
+unit class Pod::To::Cached;
 
 use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
@@ -7,7 +7,7 @@ use JSON::Fast;
 
 =begin pod
 
-=TITLE Pod::Cached
+=TITLE Pod::To::Cached
 
 =SUBTITLE Create a precompiled cache of POD files
 
@@ -15,26 +15,26 @@ Module to take a collection of POD files and create a precompiled cache. Methods
 to add a POD file to a cache.
 
 =begin SYNOPSIS
-use Pod::Cached;
+use Pod::To::Cached;
 
-my Pod::Cached $cache .= new(:path<path-to-cache>, :source<path-to-directory-with-pod-files>);
+my Pod::To::Cached $cache .= new(:path<path-to-cache>, :source<path-to-directory-with-pod-files>);
 
 $cache.update-cache;
 
 for $cache.list-files( :all ).kv -> $filename, $status {
     given $status {
-        when Pod::Cached::Valid {say "$filename has valid cached POD"}
-        when Pod::Cached::Updated {say "$filename has valid POD, just updated"}
-        when Pod::Cached::Tainted {say "$filename has been modified since the cache was last updated"}
-        when Pod::Cached::Failed {say "$filename has been modified, but contains invalid POD"}
-        when Pod::Cached::New {say "$filename has not yet been added to pod-cache"}
+        when Pod::To::Cached::Valid {say "$filename has valid cached POD"}
+        when Pod::To::Cached::Updated {say "$filename has valid POD, just updated"}
+        when Pod::To::Cached::Tainted {say "$filename has been modified since the cache was last updated"}
+        when Pod::To::Cached::Failed {say "$filename has been modified, but contains invalid POD"}
+        when Pod::To::Cached::New {say "$filename has not yet been added to pod-cache"}
     }
     user-supplied-routine-for-processing-pod( $cache.pod( $filename ) );
 }
 
 # Find files with status
 say 'These pod files failed:';
-.say for $cache.list-files( Pod::Cached::Failed );
+.say for $cache.list-files( Pod::To::Cached::Failed );
 
 # Remove the dependence on the pod source
 $cache.freeze;
@@ -282,8 +282,8 @@ method get-pods {
 method pod( Str $filename,
                     :$when-failed = 'note-none', # provide a note, do not supply Pod from cache
                     :$when-tainted = 'allow' # no not, but supply POD (old cache value)
-                     ) {
-    die 'No such filename in cache' unless $filename ~~ any(%!files.keys);
+                     ) is export {
+    die "Filename <$filename> not in cache" unless $filename ~~ any(%!files.keys);
     sub act-on(Str:D $filename, $behaviour, $message --> Bool) {
         my Bool $rv;
         given $behaviour {
@@ -330,7 +330,7 @@ multi method list-files( Status $s ) {
 
 multi method list-files( Bool :$all --> Hash) {
     return unless $all;
-    ( gather for %!files.kv -> $pname, %info {
+    ( gather for %.files.kv -> $pname, %info {
         take $pname => %info<status>.Str
     }).hash
 }
