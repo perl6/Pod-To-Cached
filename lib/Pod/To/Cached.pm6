@@ -111,6 +111,9 @@ has Str @.error-messages;
 submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False) {
 #    my $threads = %*ENV<THREADS>.?Int // 1;
 #    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+}
+
+submethod TWEAK {
     self.get-cache;
 }
 
@@ -266,17 +269,15 @@ method save-index {
 }
 
 method get-pods {
-    die 'No pods accessible for a frozen cache' if $!frozen; # should ever get here
+    die 'No pods accessible for a frozen cache' if $!frozen; # should never get here
     return @!pods if +@!pods;
     #| Recursively finds all pod files
-     my $all-extensions = @!extensions.join("|");
-     my $ending-rx = rx:i/ <$all-extensions> $ /;
      @!pods = my sub recurse ($dir) {
          gather for dir($dir) {
-             take .Str if  .extension ~~ $ending-rx;
+             take .Str if  .extension ~~ any( @!extensions );
              take slip sort recurse $_ if .d;
          }
-     }($!source)
+     }($!source); # is the first definition of $dir
 }
 
 method pod( Str $filename,
