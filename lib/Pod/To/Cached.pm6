@@ -95,7 +95,7 @@ $cache.freeze;
 =end pod
 
 constant INDEX = 'file-index.json';
-enum Status  <New Valid Tainted Updated Failed>;
+enum Status  is export <New Valid Tainted Updated Failed>;
 
 has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
