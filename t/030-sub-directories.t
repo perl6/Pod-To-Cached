@@ -30,4 +30,10 @@ $cache.update-cache;
 lives-ok { $cache.update-cache }, 'update cache with sub-dirs';
 #--MARKER-- Test 3
 nok 'sub-dir-1' ~~ any( $cache.list-files(:all).keys ), 'sub-directories filtered from file list';
+
+
+'t'.IO.&indir( {$cache .= new(:source( 'tmp/doc' ) ) } );
+ok 't/.pod-cache'.IO ~~ :d, 'default repository created';
+rmtree 't/.pod-cache';
+
 done-testing;
