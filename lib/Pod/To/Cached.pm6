@@ -219,7 +219,7 @@ method update-cache( --> Bool ) {
 
     for %!files.kv -> $pod-name, %info {
         next if %info<status> ~~ any(Valid, Updated);
-        note "Processing $pod-name" if $!verbose;
+        note "Caching $pod-name" if $!verbose;
         my $handle;
         try {
             $!precomp.precompile(%info<path>.IO, %info<cache-key>, :force);
