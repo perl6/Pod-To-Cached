@@ -237,7 +237,7 @@ method update-cache( --> Bool ) {
         else {
             %!files{$pod-name}<status> = Failed;
             note "$pod-name failed to compile" if $!verbose;
-            $rv = False; # belt and braces, since this probably should be set in catch
+            $rv = False; # belt and braces, since this probably should be set in CATCH phaser
             # A new and failed pod will not have a handle
         }
     }

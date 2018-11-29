@@ -1,6 +1,6 @@
 {
     "perl" : "6.*",
-    "name" : "Pod::Cached",
+    "name" : "Pod::To::Cached",
     "version" : "0.1.0",
     "author" : "Richard Hainsworth",
     "description" : "Precompile a collection of pod files into a cache.",
