@@ -339,8 +339,15 @@ multi method list-files( Str $s ) {
     }
 }
 
+# The following is ugly, but cleaner ways seem to choke when list-file str returns Nil
+
 multi method list-files( *@statuses ) {
-    gather for @statuses { take |self.list-files( $_ ) }
+    my @s;
+    for @statuses {
+        my @a = self.list-files( $_ );
+        @s.append(  |@a ) if +@a
+    }
+    @s
 }
 
 multi method list-files( Bool :$all --> Hash) {
