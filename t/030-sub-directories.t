@@ -33,6 +33,7 @@ nok 'sub-dir-1' ~~ any( $cache.list-files(:all).keys ), 'sub-directories filtere
 
 
 't'.IO.&indir( {$cache .= new(:source( 'tmp/doc' ) ) } );
+#--MARKER-- Test 4
 ok 't/.pod-cache'.IO ~~ :d, 'default repository created';
 rmtree 't/.pod-cache';
 

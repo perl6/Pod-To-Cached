@@ -9,7 +9,7 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-plan 27;
+plan 28;
 
 my Pod::To::Cached $cache;
 
@@ -73,11 +73,11 @@ is +%config<files>.keys, 2, 'Two pod files in index';
 #--MARKER-- Test 11
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'New', 'a-second-pod-file'=>'New').hash, 'expected value of list-files :all';
 #--MARKER-- Test 12
-is-deeply $cache.list-files( Pod::To::Cached::New ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
+is-deeply $cache.list-files( 'New' ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
 #--MARKER-- Test 13
 is-deeply (gather for %config<files>.kv -> $pname, %info {
     take $pname if %info<status> ~~ Pod::To::Cached::New
-}).sort, $cache.list-files( Pod::To::Cached::New ).sort, 'Index matches object about files';
+}).sort, $cache.list-files( 'New' ).sort, 'Index matches object about files';
 
 my $mod-time = INDEX.IO.modified;
 my $rv;
@@ -138,11 +138,13 @@ ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache 
 $cache .= new( :source( DOC ), :path( REP ));
 #--MARKER-- Test 24
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One tainted, one updated';
-$cache.update-cache;
 #--MARKER-- Test 25
+is-deeply $cache.list-files( <Valid Tainted> ), ( 'a-pod-file' , 'a-second-pod-file', ), 'List with list of statuses';
+$cache.update-cache;
+#--MARKER-- Test 26
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Updated').hash, 'Both updated';
 
-#--MARKER-- Test 26
-lives-ok {$cache .=new(:path( REP ))}, 'with a valid cache, source can be omitted';
 #--MARKER-- Test 27
+lives-ok {$cache .=new(:path( REP ))}, 'with a valid cache, source can be omitted';
+#--MARKER-- Test 28
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Valid').hash, 'Both Valid, not Updated because new instantiation of Pod::To::Cached';

@@ -20,7 +20,7 @@ mktree 't/tmp/doc';
 
 # set up pod files
 constant DRY-RUN = 5;
-constant HEAVY-RUN = 256;
+constant HEAVY-RUN = 380;
 constant TEST-FILE = 't/doctest/community.pod6';
 
 my $text = TEST-FILE.IO.slurp;

@@ -23,18 +23,18 @@ $cache.update-cache;
 
 for $cache.list-files( :all ).kv -> $filename, $status {
     given $status {
-        when Pod::To::Cached::Valid {say "$filename has valid cached POD"}
-        when Pod::To::Cached::Updated {say "$filename has valid POD, just updated"}
-        when Pod::To::Cached::Tainted {say "$filename has been modified since the cache was last updated"}
-        when Pod::To::Cached::Failed {say "$filename has been modified, but contains invalid POD"}
-        when Pod::To::Cached::New {say "$filename has not yet been added to pod-cache"}
+        when 'Valid' {say "$filename has valid cached POD"}
+        when 'Updated' {say "$filename has valid POD, just updated"}
+        when 'Tainted' {say "$filename has been modified since the cache was last updated"}
+        when 'Failed' {say "$filename has been modified, but contains invalid POD"}
+        when 'New' {say "$filename has not yet been added to pod-cache"}
     }
     user-supplied-routine-for-processing-pod( $cache.pod( $filename ) );
 }
 
 # Find files with status
 say 'These pod files failed:';
-.say for $cache.list-files( Pod::To::Cached::Failed );
+.say for $cache.list-files( 'Failed' );
 
 # Remove the dependence on the pod source
 $cache.freeze;
@@ -76,7 +76,13 @@ $cache.freeze;
     The intent of this method is to allow the pod-cache to be copied without the original pod-files.
     update-cache will throw an error if used on a frozen cache
 
-=item list-files( Status $s)
+=item list-files( Str $s)
+    returns an Sequence of files with the given status
+
+=item list-files( Str $s1, $s2 )
+    returns an Sequence of files with the given status list
+
+=item list-files( :all )
     returns an Sequence of files with the given status
 
 =item pod
@@ -176,7 +182,10 @@ method verify-source( --> Bool ) {
     my $rv = True;
     for @!pods -> $pfile {
         my $nm = $!source eq "." ?? $pfile !! $pfile.substr($!source.chars + 1); # name from source root directory
-        $nm = $nm.subst(/ \. \w+ $/, ''); #remove any extension
+
+        # Normalise the cache name.
+        # For some reason, all names & directories made lower case and extension removed.
+        $nm = $nm.subst(/ \. \w+ $/, '').lc;
         if %!files{$nm}:exists {
             if %!files{$nm}<path> eq $pfile {
                 # change an Updated status to Valid because re-initialising
@@ -323,14 +332,19 @@ method pod( Str $filename,
     nqp::atkey(%!files{$filename}<handle>.unit,'$=pod')[0];
 }
 
-multi method list-files( Status $s ) {
+multi method list-files( Str $s ) {
+    return () unless $s ~~ any(Status.enums.keys);
     gather for %!files.kv -> $pname, %info {
         take $pname if %info<status> ~~ $s
     }
 }
 
+multi method list-files( *@statuses ) {
+    gather for @statuses { take |self.list-files( $_ ) }
+}
+
 multi method list-files( Bool :$all --> Hash) {
-    return unless $all;
+    return %( ) unless $all;
     ( gather for %.files.kv -> $pname, %info {
         take $pname => %info<status>.Str
     }).hash
