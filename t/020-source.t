@@ -139,7 +139,7 @@ $cache .= new( :source( DOC ), :path( REP ));
 #--MARKER-- Test 24
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One tainted, one updated';
 #--MARKER-- Test 25
-is-deeply $cache.list-files( <Valid Tainted> ), ( 'a-pod-file' , 'a-second-pod-file', ), 'List with list of statuses';
+is-deeply $cache.list-files( <Valid Tainted> ), [ 'a-pod-file' , 'a-second-pod-file', ], 'List with list of statuses';
 $cache.update-cache;
 #--MARKER-- Test 26
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Updated').hash, 'Both updated';
