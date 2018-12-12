@@ -9,7 +9,7 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-plan 28;
+plan 32;
 
 my Pod::To::Cached $cache;
 
@@ -155,6 +155,12 @@ is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-fi
 #--MARKER-- Test 26
 like $cache.error-messages.join, /'Compile error'/, 'Error detected in pod';
 
+#--MARKER-- Test 27
+lives-ok { $rv = $cache.cache-timestamp('a-pod-file')}, 'method cache-timestamp lives';
+#--MARKER-- Test 28
+ok $rv ~~ Instant, 'return value is an Instant';
+#--MARKER-- Test 29
+ok $rv < (DOC ~ '/a-pod-file.pod6').IO.modified, 'new file not added to cache because it did not compile';
 # return to valid pod;
 (DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
     =begin pod
@@ -165,8 +171,10 @@ like $cache.error-messages.join, /'Compile error'/, 'Error detected in pod';
     =end pod
     POD-CONTENT
 
-#--MARKER-- Test 27
+#--MARKER-- Test 30
 lives-ok {$cache .=new(:path( REP ))}, 'with a valid cache, source can be omitted';
 $cache.update-cache;
-#--MARKER-- Test 28
+#--MARKER-- Test 31
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'Both Current now';
+#--MARKER-- Test 32
+ok (DOC ~ '/a-pod-file.pod6').IO.modified < $cache.cache-timestamp('a-pod-file'), 'new file compiles so timestamp after modification';

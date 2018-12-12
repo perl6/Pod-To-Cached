@@ -17,6 +17,7 @@ $cache .= new( :path( REP ));
 #--MARKER-- Test 1
 ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 
+
 (DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
     =begin pod
     =TITLE More and more
@@ -39,7 +40,6 @@ diag 'testing freeze';
 #--MARKER-- Test 5
 throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because the following'/), 'Cant freeze when a file is tainted';
 #--MARKER-- Test 6
-$cache.verbose = True;
 ok $cache.update-cache, 'updates without problem';
 
 #--MARKER-- Test 7
