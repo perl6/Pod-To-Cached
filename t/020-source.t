@@ -68,35 +68,26 @@ ok (%config<files>:exists
     and %config<files>.WHAT ~~ Hash)
     , 'files is as expected';
 #--MARKER-- Test 10
-is +%config<files>.keys, 2, 'Two pod files in index';
-
-#--MARKER-- Test 11
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'New', 'a-second-pod-file'=>'New').hash, 'expected value of list-files :all';
-#--MARKER-- Test 12
-is-deeply $cache.list-files( 'New' ).sort,  ( 'a-pod-file', 'a-second-pod-file'), 'list-files works with Status';
-#--MARKER-- Test 13
-is-deeply (gather for %config<files>.kv -> $pname, %info {
-    take $pname if %info<status> ~~ Pod::To::Cached::New
-}).sort, $cache.list-files( 'New' ).sort, 'Index matches object about files';
+is +%config<files>.keys, 0, 'No source files in index because nothing in cache';
 
 my $mod-time = INDEX.IO.modified;
 my $rv;
-#--MARKER-- Test 14
+#--MARKER-- Test 11
 lives-ok {$rv = $cache.update-cache}, 'Updates cache without dying';
-#--MARKER-- Test 15
+#--MARKER-- Test 12
 nok $rv, 'Returned false because of compile errors';
-#--MARKER-- Test 16
+#--MARKER-- Test 13
 like $cache.error-messages[0], /'Compile error in'/, 'Error messages saved';
-#--MARKER-- Test 17
+#--MARKER-- Test 14
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Failed', 'a-second-pod-file'=>'Failed').hash, 'lists Failed files';
-#--MARKER-- Test 18
+#--MARKER-- Test 15
 nok INDEX.IO.modified > $mod-time, 'INDEX not modified';
-#--MARKER-- Test 19
+#--MARKER-- Test 16
 is +gather for $cache.files.kv -> $nm, %inf { take 'f' unless %inf<handle>:exists },
-    2, 'No handles are defined for New & Failed files';
+    2, 'No handles are defined for Failed files';
 
 $cache.verbose = True;
-#--MARKER-- Test 20
+#--MARKER-- Test 17
 stderr-like { $cache.update-cache }, /'Cache not fully updated'/, 'Got correct progress message';
 $cache.verbose = False;
 
@@ -118,13 +109,14 @@ $cache.verbose = False;
     =end pod
     POD-CONTENT
 
-#--MARKER-- Test 21
+#--MARKER-- Test 18
 ok $cache.update-cache, 'Returned true because both POD now compile';
+# this works because the source paths are in the cache object, and they are new
 
-#--MARKER-- Test 22
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Updated', 'a-second-pod-file'=>'Updated').hash, 'list-files shows two pod Updated';
+#--MARKER-- Test 19
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'list-files shows two pod Current';
 
-#--MARKER-- Test 23
+#--MARKER-- Test 20
 ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache ok';
 
 (DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
@@ -136,15 +128,45 @@ ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache 
     =end pod
     POD-CONTENT
 $cache .= new( :source( DOC ), :path( REP ));
-#--MARKER-- Test 24
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Tainted').hash, 'One tainted, one updated';
-#--MARKER-- Test 25
-is-deeply $cache.list-files( <Valid Tainted> ), [ 'a-pod-file' , 'a-second-pod-file', ], 'List with list of statuses';
+#--MARKER-- Test 21
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Valid').hash, 'One current, one tainted';
+#--MARKER-- Test 22
+is-deeply $cache.list-files( <Valid Current> ), ( 'a-pod-file' , 'a-second-pod-file', ), 'List with list of statuses';
 $cache.update-cache;
+#--MARKER-- Test 23
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'Both updated';
+
+#has an error
+(DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
+    =pod A test file
+    =TITLE This is a title
+
+    Some text
+
+    =end pod
+    POD-CONTENT
+
+$cache .= new( :source( DOC ), :path( REP ));
+#--MARKER-- Test 24
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Current').hash, 'One current, one tainted';
+$cache.update-cache;
+#--MARKER-- Test 25
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Current').hash, 'One remains Valid because new version did not compile';
 #--MARKER-- Test 26
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Updated').hash, 'Both updated';
+like $cache.error-messages.join, /'Compile error'/, 'Error detected in pod';
+
+# return to valid pod;
+(DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE This is a title
+
+    Some text
+
+    =end pod
+    POD-CONTENT
 
 #--MARKER-- Test 27
 lives-ok {$cache .=new(:path( REP ))}, 'with a valid cache, source can be omitted';
+$cache.update-cache;
 #--MARKER-- Test 28
-is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Valid', 'a-second-pod-file'=>'Valid').hash, 'Both Valid, not Updated because new instantiation of Pod::To::Cached';
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'Both Current now';

@@ -20,7 +20,7 @@ mktree 't/tmp/doc';
 
 # set up pod files
 constant DRY-RUN = 5;
-constant HEAVY-RUN = 380;
+constant HEAVY-RUN = 10;
 constant TEST-FILE = 't/doctest/community.pod6';
 
 my $text = TEST-FILE.IO.slurp;
@@ -35,7 +35,7 @@ $start1 = now;
 lives-ok { $cache .= new(:path<t/tmp/ref>, :source<t/tmp/doc>); $cache.update-cache }, 'dry run lives';
 $stop1 = now;
 #--MARKER-- Test 3
-is +$cache.list-files( Pod::To::Cached::Updated ), DRY-RUN, DRY-RUN ~ ' files cached as updated (new/compiled)';
+is +$cache.list-files( 'Current' ), DRY-RUN, DRY-RUN ~ ' files cached as compiled';
 
 empty-directory 't/tmp';
 mktree 't/tmp/doc';
@@ -49,7 +49,7 @@ $start2 = now;
 lives-ok { $cache .= new(:path<t/tmp/ref>, :source<t/tmp/doc>); $cache.update-cache }, 'Heavy run lives';
 $stop2 = now;
 #--MARKER-- Test 6
-is +$cache.list-files( Pod::To::Cached::Updated ), HEAVY-RUN, HEAVY-RUN ~ ' files cached as updated (new/compiled)';
+is +$cache.list-files( 'Current' ), HEAVY-RUN, HEAVY-RUN ~ ' files cached as compiled';
 
 diag "Dry run took " ~ DateTime.new($stop1 - $start1).hh-mm-ss ~ '. Heavy run took ' ~ DateTime.new($stop2-$start2).hh-mm-ss;
 empty-directory 't/tmp';

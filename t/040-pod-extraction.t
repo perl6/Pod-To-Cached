@@ -8,7 +8,7 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-plan 15;
+plan 11;
 
 my Pod::To::Cached $cache;
 my $rv;
@@ -21,7 +21,7 @@ ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
     =begin pod
     =TITLE More and more
 
-    Some more text but now it is changed, and again
+    Some extra changed text but now it is changed
 
     =end pod
     POD-CONTENT
@@ -29,40 +29,30 @@ ok $cache.pod('a-pod-file') ~~ Pod::Block::Named, 'pod is returned from cache';
 $cache .=new(:path( REP ));
 my %h = $cache.list-files( :all );
 #--MARKER-- Test 2
-is %h<a-pod-file>, 'Valid', 'one Valid';
+is %h<a-second-pod-file>, 'Valid', 'The old version is still in cache, no update-cache';
 #--MARKER-- Test 3
-is %h<a-second-pod-file>, 'Tainted', 'One Valid, not Updated because new instantiation of Pod::To::Cached, one Tainted';
+lives-ok { $rv = $cache.pod('a-second-pod-file') }, 'Old Pod is provided';
 #--MARKER-- Test 4
-throws-like { $cache.pod('a-second-pod-file', :when-tainted('exit')) }, Exception,
-    :message(/ 'POD called with exit processing'/), 'Pod should fail if tainted behaviour exit';
-#--MARKER-- Test 5
-is $cache.pod('a-second-pod-file', :when-tainted('none')), Nil, 'Nil return for none';
-
-#--MARKER-- Test 6
-stderr-like { $rv = $cache.pod('a-second-pod-file', :when-tainted('note')) }, /'source pod has been modified'/, 'An error message when note';
-#--MARKER-- Test 7
-ok $rv ~~ Pod::Block::Named, 'pod supplies output for note because previous version still in cache';
-#--MARKER-- Test 8
-stderr-like {$rv = $cache.pod('a-second-pod-file', :when-tainted('note-none'))}, /'source pod has been modified'/, 'Same error message when note-none';
-#--MARKER-- Test 9
-nok $rv, 'produces a note, but no POD';
+like $rv.contents[1].contents[0], /'Some more text but now it is changed'/, 'previous text in source';
 
 diag 'testing freeze';
-#--MARKER-- Test 10
+#--MARKER-- Test 5
 throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because the following'/), 'Cant freeze when a file is tainted';
-
-#--MARKER-- Test 11
+#--MARKER-- Test 6
+$cache.verbose = True;
 ok $cache.update-cache, 'updates without problem';
 
-#--MARKER-- Test 12
+#--MARKER-- Test 7
+like $cache.pod('a-second-pod-file').contents[1].contents[0], /'Some extra changed text but now it is changed'/, 'new version after update';
+#--MARKER-- Test 8
 lives-ok { $cache.freeze }, 'All updated so now can freeze';
 
-rmtree DOC;
-#--MARKER-- Test 13
+#rmtree DOC;
+#--MARKER-- Test 9
 lives-ok { $cache .=new(:path( REP )) }, 'Gets a frozen cache without source';
 
-#--MARKER-- Test 14
+#--MARKER-- Test 10
 throws-like { $cache.update-cache }, Exception, :message(/ 'Cannot update frozen cache'/), 'No updating on a frozen cache';
 
-#--MARKER-- Test 15
-throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'Filename <' \w+ '> not in cache'/), 'Cannot get POD for invalid filename';
+#--MARKER-- Test 11
+throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'Source name ｢xxxyyyzz｣ not in cache'/), 'Cannot get POD for invalid source name';
