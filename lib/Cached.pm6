@@ -4,7 +4,7 @@ use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
 use nqp;
 use JSON::Fast;
-use PrecompilationDoc;
+use CompUnit::PrecompilationRepository::Document;
 
 =begin pod
 
