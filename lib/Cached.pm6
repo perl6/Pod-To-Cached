@@ -99,8 +99,8 @@ $cache.freeze;
 
 =item pod
     method pod(Str $source)
-    Returns the POD Object generated from the file associated with $source name.
-    When a doc-set is being actively updated, then pod files may have failed.
+    Returns an array of POD Objects generated from the file associated with $source name.
+    When a doc-set is being actively updated, then pod files may have failed, in which case they have Status Valid.
     To froze a cache, all files must have Current status
 
 =item Status is an enum with the following elements and semantics
@@ -311,7 +311,7 @@ method pod( Str $source-name ) is export {
     die "Source name ｢$source-name｣ not in cache" unless $source-name ~~ any(%!files.keys);
     die "Attempt to obtain non-existent POD for <$source-name>. Is the source new and failed to compile? Has the cache been updated?"
         without %!files{$source-name}<handle>;
-    nqp::atkey(%!files{$source-name}<handle>.unit,'$=pod')[0];
+    nqp::atkey(%!files{$source-name}<handle>.unit,'$=pod');
 }
 
 multi method list-files( Str $s --> Positional ) {
