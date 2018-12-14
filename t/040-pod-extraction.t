@@ -39,7 +39,7 @@ like $rv[0].contents[1].contents[0], /'Some more text but now it is changed'/, '
 
 diag 'testing freeze';
 #--MARKER-- Test 5
-throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because the following'/), 'Cant freeze when a file is tainted';
+throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because some files not Current'/), 'Cant freeze when a file not Current';
 #--MARKER-- Test 6
 ok $cache.update-cache, 'updates without problem';
 

@@ -9,7 +9,7 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-plan 32;
+plan 35;
 
 my Pod::To::Cached $cache;
 
@@ -178,3 +178,28 @@ $cache.update-cache;
 is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'Both Current now';
 #--MARKER-- Test 32
 ok (DOC ~ '/a-pod-file.pod6').IO.modified < $cache.cache-timestamp('a-pod-file'), 'new file compiles so timestamp after modification';
+(DOC ~ '/pod-file-to-deprecate.pod6').IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE This will be disappear from source
+
+    Some more text but now it is changed
+
+    =end pod
+    POD-CONTENT
+$cache .=new(:path(REP));
+$cache.update-cache;
+#--MARKER-- Test 33
+is +$cache.list-files(:all).keys, 3, 'file added';
+(DOC ~ '/pod-file-to-deprecate.pod6').IO.unlink;
+#--MARKER-- Test 34
+stderr-like {$cache .=new(:path(REP),:verbose)}, /
+    'names not associated with pod files:'
+    .+ 'pod-file-to-deprecate'
+    /, 'detects old files';
+$cache.verbose = False;
+$cache.update-cache;
+#--MARKER-- Test 35
+is-deeply $cache.list-files( :all ), ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current', 'pod-file-to-deprecate' => 'Old').hash, 'An Old file is detected';
+
+# remove rep with old source
+rmtree REP;

@@ -22,7 +22,7 @@ for <sub-dir-1 sub-dir-2 sub-dir-3> -> $d {
 }
 
 #--MARKER-- Test 1
-lives-ok { $cache .=new( :path( REP ) )}, 'doc cache created with sub-directories';
+lives-ok { $cache .=new( :path( REP ), :source( DOC ) )}, 'doc cache created with sub-directories';
 $cache.update-cache;
 #--MARKER-- Test 2
 lives-ok { $cache.update-cache }, 'update cache with sub-dirs';

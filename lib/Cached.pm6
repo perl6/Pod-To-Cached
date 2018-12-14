@@ -112,11 +112,13 @@ $cache.freeze;
     There is not a compiled source in the cache, but there has been an attempt to add the source name to the cache that did not compile
 =defn New
     A new pod source has been detected that is not in cache, but C<update-cache> has not yet been called to compile the source. A transitional Status
+=defn Old
+    A source name that is in the cache but no longer reflects an existing source.
 
 =end pod
 
 constant INDEX = 'file-index.json';
-enum Status  is export <Current Valid Failed New>; # New is internally used, but not stored in DB
+enum Status  is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
 
 has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
@@ -198,12 +200,13 @@ method verify-source( --> Bool ) {
     (@!error-messages = "No POD files found under $!source", ) and return False
         unless +self.get-pods > 0;
     my $rv = True;
+    my SetHash $old .= new( %!files.keys );
     for @!pods -> $pfile {
         my $nm = $!source eq "." ?? $pfile !! $pfile.substr($!source.chars + 1); # name from source root directory
         # Normalise the cache name.
         # For some reason, all names & directories made lower case and extension removed.
         $nm = $nm.subst(/ \. \w+ $/, '').lc;
-        if %!files{$nm}:exists {
+        if %!files{$nm}:exists { # cannot use SetHash removal here because duplicates would then register as New
             if %!files{$nm}<path> eq $pfile {
                 # detect tainted source
                 %!files{$nm}<status> = Valid if %!files{$nm}<added> < %!files{$nm}<path>.IO.modified;
@@ -216,19 +219,18 @@ method verify-source( --> Bool ) {
         else {
             %!files{$nm} = (:cache-key(nqp::sha1($nm)), :path($pfile), :status( New ), :added(0) ).hash;
         }
+        $old{$nm}--;
     }
-    =comment out garbage collection
-    my Set $garbage = Set.new( @!pods ) (-) Set.new( %!files.keys) ;
-    if $garbage.elems {
-        @!error-messages.push("Cache contains the following pod not in source\n" ~ $garbage);
-        $rv = False;
-    }
-     $!precomp-store.remove-from-cache(CompUnit::PrecompilationId $precomp-id)
 
+    if $old.elems {
+        note "Cache contains the following source names not associated with pod files:\n\t" ~ $old.keys.join("\n\t"),
+            "\nConsider deleting and regenerating the cache to remove old files"
+            if $!verbose;
+        %!files{ $_ }<status> = Old for $old.keys;
+    }
     =comment ary
-        for pod files that remain unchanged in name, the %!files entry will be changed.
-        but for pod files that change their name, the cache will continue to contain old content
-        TODO cache garbage collection: check whether any files not in index but are in doc-set, and remove from cache
+        pod files that change their name, the cache will continue to contain old content
+        TODO cache garbage collection: remove from cache
 
     note 'Source verified' if $!verbose;
     $rv
@@ -346,9 +348,9 @@ method cache-timestamp( $source --> Instant ) {
 method freeze( --> Bool ) {
     return if $!frozen;
     my @not-ok = gather for %!files.kv -> $pname, %info {
-        take $pname unless %info<status> ~~ Current
+        take "$pname ({%info<status>})" unless %info<status> ~~ Current
     }
-    die "Cannot freeze because the following are either Valid (source file is newer than cached object) or Failed (source not added to cache):\n" ~ @not-ok.join("\n\t")
+    die "Cannot freeze because some files not Current:\n" ~ @not-ok.join("\n\t")
         if +@not-ok;
     $!frozen = True;
     self.save-index;
