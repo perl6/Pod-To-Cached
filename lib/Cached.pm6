@@ -22,12 +22,13 @@ my Pod::To::Cached $cache .= new(:path<path-to-cache>, :source<path-to-directory
 
 $cache.update-cache;
 
-for $cache.list-files( :all ).kv -> $source-name, $status {
+for $cache.hash-files.kv -> $source-name, $status {
     given $status {
         when 'Current' {say "｢$source-name｣ is up to date with POD source"}
         when 'Valid' {say "｢$source-name｣ has valid POD, but newer POD source contains invalid POD"}
         when 'Failed' {say "｢$source-name｣ is not in cache, and source file contains invalid POD"}
         when 'New' { say "｢$source-name｣ is not in cache and cache has not been updated"}
+        when 'Old' { say "｢$source-name｣ is in cache, but has no associated pod file in DOC"}
     }
     user-supplied-routine-for-processing-pod( $cache.pod( $source-name ) );
 }
@@ -86,11 +87,13 @@ $cache.freeze;
 =item list-files( Str $s --> Positional )
     returns an Sequence of files with the given status
 
-=item list-files( Str $s1, $s2 --> Array )
+=item list-files( Str $s1, $s2 --> Positional )
     returns an Array of files with the given status list
 
-=item list-files( :all --> Associative )
-    returns an Sequence of files with the given status
+=item hash-files( *@statuses? --> Associative )
+    returns a map of the source-name and its statuses
+=item2 explicitly give required status strings: C<< $cache.hash-files(<Old Failed>) >>
+=item2 return all files C< $cache.hash-files >
 
 =item cache-timestamp( $source --> Instant )
     returns the Instant when a valid version of the Pod was added to the cache
@@ -334,10 +337,15 @@ multi method list-files( *@statuses --> Positional ) {
     @s.sort.list
 }
 
-multi method list-files( Bool :$all --> Hash) {
-    return %( ) unless $all;
+multi method hash-files( --> Hash) {
     ( gather for %.files.kv -> $pname, %info {
         take $pname => %info<status>.Str
+    }).hash
+}
+
+multi method hash-files( @statuses --> Hash ) {
+    ( gather for %.files.kv -> $pname, %info {
+        take $pname => %info<status>.Str if %info<status> ~~ any( @statuses )
     }).hash
 }
 

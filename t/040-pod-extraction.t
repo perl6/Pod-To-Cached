@@ -28,7 +28,7 @@ ok $cache.pod('a-pod-file')[0] ~~ Pod::Block::Named, 'pod is returned from cache
     POD-CONTENT
 
 $cache .=new(:path( REP ));
-my %h = $cache.list-files( :all );
+my %h = $cache.hash-files;
 #--MARKER-- Test 2
 is %h<a-second-pod-file>, 'Valid', 'The old version is still in cache, no update-cache';
 #--MARKER-- Test 3
