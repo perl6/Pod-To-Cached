@@ -201,13 +201,12 @@ method verify-source( --> Bool ) {
     (@!error-messages = "$!source is not a directory", ) and return False
         unless $!source.IO ~~ :d;
     (@!error-messages = "No POD files found under $!source", ) and return False
-        unless +self.get-pods > 0;
+        unless self.get-pods;
     my $rv = True;
     my SetHash $old .= new( %!files.keys );
     for @!pods -> $pfile {
         my $nm = $!source eq "." ?? $pfile !! $pfile.substr($!source.chars + 1); # name from source root directory
-        # Normalise the cache name.
-        # For some reason, all names & directories made lower case and extension removed.
+        # Normalise the cache name to lower case
         $nm = $nm.subst(/ \. \w+ $/, '').lc;
         if %!files{$nm}:exists { # cannot use SetHash removal here because duplicates would then register as New
             if %!files{$nm}<path> eq $pfile {
@@ -270,7 +269,7 @@ method update-cache( --> Bool ) {
             # A new and failed pod will not have a handle
         }
     }
-    note( @!error-messages.join("\n")) if $!verbose and +@!error-messages;
+    note( @!error-messages.join("\n")) if $!verbose and @!error-messages;
     self.save-index if $rv;
     note ('Cache ' ~ ( $rv ?? '' !! 'not ' ) ~ 'fully updated') if $!verbose;
     $rv # we leave the $!cache-verified flag True because what is in the cache is verified
@@ -302,7 +301,7 @@ method save-index {
 
 method get-pods {
     die 'No pods accessible for a frozen cache' if $!frozen; # should never get here
-    return @!pods if +@!pods;
+    return @!pods if @!pods;
     #| Recursively finds all pod files
      @!pods = my sub recurse ($dir) {
          gather for dir($dir) {
@@ -332,7 +331,7 @@ multi method list-files( *@statuses --> Positional ) {
     my @s;
     for @statuses {
         my @a = self.list-files( $_ );
-        @s.append(  |@a ) if +@a
+        @s.append(  |@a ) if @a
     }
     @s.sort.list
 }
@@ -359,7 +358,7 @@ method freeze( --> Bool ) {
         take "$pname ({%info<status>})" unless %info<status> ~~ Current
     }
     die "Cannot freeze because some files not Current:\n" ~ @not-ok.join("\n\t")
-        if +@not-ok;
+        if @not-ok;
     $!frozen = True;
     self.save-index;
 }
