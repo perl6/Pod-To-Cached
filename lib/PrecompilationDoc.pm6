@@ -1,4 +1,4 @@
-use v6.c;
+use v6.*;
 use nqp;
 class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRepository::Default {
     method !load-handle-for-path(CompUnit::PrecompilationUnit $unit) {

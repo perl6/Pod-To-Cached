@@ -1,5 +1,5 @@
 #! /usr/bin/env perl6
-use v6.c;
+use v6.*;
 use lib 'lib';
 use Test;
 use Test::Output;
@@ -7,8 +7,7 @@ use File::Directory::Tree;
 use Pod::To::Cached;
 
 diag 'Heavy duty test optional';
-done-testing;
-exit;
+done-testing; exit; # comment this line out to get test
 
 if 't/tmp'.IO ~~ :d  {
     empty-directory 't/tmp';
@@ -20,7 +19,7 @@ mktree 't/tmp/doc';
 
 # set up pod files
 constant DRY-RUN = 5;
-constant HEAVY-RUN = 10;
+constant HEAVY-RUN = 70;
 constant TEST-FILE = 't/doctest/community.pod6';
 
 my $text = TEST-FILE.IO.slurp;
@@ -45,8 +44,8 @@ diag 'Starting Heavy run';
 #--MARKER-- Test 4
 is +'t/tmp/doc'.IO.dir, HEAVY-RUN, 'files written';
 $start2 = now;
-#--MARKER-- Test 5
-lives-ok { $cache .= new(:path<t/tmp/ref>, :source<t/tmp/doc>); $cache.update-cache }, 'Heavy run lives';
+$cache .= new(:path<t/tmp/ref>, :source<t/tmp/doc>);
+$cache.update-cache ;
 $stop2 = now;
 #--MARKER-- Test 6
 is +$cache.list-files( 'Current' ), HEAVY-RUN, HEAVY-RUN ~ ' files cached as compiled';

@@ -1,4 +1,5 @@
 unit class Pod::To::Cached;
+constant MAX-COMPILATIONS = 64; #freezes otherwise
 
 use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
@@ -133,10 +134,11 @@ has %.files;
 has @!pods;
 has Bool $.frozen = False;
 has Str @.error-messages;
+has Lock $!lock .= new;
 
-submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False) {
+submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False ) {
 #    my $threads = %*ENV<THREADS>.?Int // 1;
-#    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $threads);
+    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => MAX-COMPILATIONS);
 }
 
 submethod TWEAK {
@@ -239,40 +241,62 @@ method verify-source( --> Bool ) {
 }
 
 method update-cache( --> Bool ) {
-    =comment update-cache may be called repeatedly on a cache
-
     die 'Cannot update frozen cache' if $!frozen;
-    my $rv = True;
     @!error-messages = ();
-
+    my @compilations;
+    my @compiled;
+    my Bool $updates;
     for %!files.kv -> $source-name, %info {
         next if %info<status> ~~ Current;
-        note "Caching $source-name" if $!verbose;
-        my $handle;
-        try {
-            CATCH {
-                default {
-                    @!error-messages.push: "Compile error in $source-name:\n\t" ~ .Str;
-                    $rv = False;
-                }
-            }
-            $!precomp.precompile(%info<path>.IO, %info<cache-key>, :force );
-            $handle = $!precomp.load(%info<cache-key>)[0];
-        }
-        with $handle {
-            %!files{$source-name}<status handle added> = Current , $handle, now ;
+        @compiled.push:  self.compile( $source-name, %info<cache-key>, %info<path>, %info<status> );
+#        @compilations.push: start self.compile( $source-name, %info<cache-key>, %info<path>, %info<status> );
+#        if @compilations.elems %% (MAX-COMPILATIONS - 2) {
+#            @compiled.append: await @compilations;
+#            @compilations = ()
+#        }
+    }
+#    @compiled.append: await @compilations;
+    for @compiled {
+        if .<error>.defined {
+            @!error-messages.push: .<error>;
+            %!files{ .<source-name> }<status> = .<status> if .<status> ~~ Failed;
         }
         else {
-            %!files{$source-name}<status> = Failed if %!files{$source-name}<status> ~~ New ; # those marked Valid remain Valid
-            note "$source-name failed to compile" if $!verbose;
-            $rv = False; # belt and braces, since this probably should be set in CATCH phaser
-            # A new and failed pod will not have a handle
+            %!files{ .<source-name> }<handle status added> = .<handle>, .<status>, .<added>;
+            $updates = True;
         }
     }
-    note( @!error-messages.join("\n")) if $!verbose and @!error-messages;
-    self.save-index if $rv;
-    note ('Cache ' ~ ( $rv ?? '' !! 'not ' ) ~ 'fully updated') if $!verbose;
-    $rv # we leave the $!cache-verified flag True because what is in the cache is verified
+    my $ret-ok = not ?@!error-messages;
+    note( @!error-messages.join("\n")) if $!verbose and not $ret-ok;
+    self.save-index if $updates;
+    note ('Cache ' ~ ( $ret-ok ?? '' !! 'not ' ) ~ 'fully updated') if $!verbose;
+    $ret-ok
+}
+
+method compile( $source-name, $key, $path, $status is copy ) {
+    note "Caching $source-name" if $!verbose;
+    my ($handle , $error, $added);
+    try {
+        CATCH {
+            default {
+                $error = "Compile error in $source-name:\n\t" ~ .Str
+            }
+        }
+        $!lock.protect( {
+            $!precomp.precompile($path.IO, $key, :force );
+            $handle = $!precomp.load($key)[0];
+        })
+    }
+    with $handle {
+        $status = Current;
+        $added = now ;
+    }
+    else {
+        $status = Failed if $status ~~ New ; # those marked Valid remain Valid
+        note "$source-name failed to compile" if $!verbose;
+        $error = 'unknown precomp error' without $error; # make sure that $error is defined for no handle
+    }
+    %(:$error, :$handle, :$added, :$status, :$source-name)
 }
 
 method save-index {
