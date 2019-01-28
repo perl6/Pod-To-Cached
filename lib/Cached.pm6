@@ -1,5 +1,4 @@
 unit class Pod::To::Cached;
-constant MAX-COMPILATIONS = 64; #freezes otherwise
 
 use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
@@ -135,10 +134,11 @@ has @!pods;
 has Bool $.frozen = False;
 has Str @.error-messages;
 has Lock $!lock .= new;
+has $!threads;
 
 submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False ) {
-#    my $threads = %*ENV<THREADS>.?Int // 1;
-    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => MAX-COMPILATIONS);
+    $!threads = %*ENV<THREADS>.?Int // 64;
+    PROCESS::<$SCHEDULER> = ThreadPoolScheduler.new(initial_threads => 0, max_threads => $!threads);
 }
 
 submethod TWEAK {
@@ -244,18 +244,26 @@ method update-cache( --> Bool ) {
     die 'Cannot update frozen cache' if $!frozen;
     @!error-messages = ();
     my @compilations;
+    my @threads;
     my @compiled;
     my Bool $updates;
     for %!files.kv -> $source-name, %info {
         next if %info<status> ~~ Current;
-        @compiled.push:  self.compile( $source-name, %info<cache-key>, %info<path>, %info<status> );
-#        @compilations.push: start self.compile( $source-name, %info<cache-key>, %info<path>, %info<status> );
-#        if @compilations.elems %% (MAX-COMPILATIONS - 2) {
-#            @compiled.append: await @compilations;
-#            @compilations = ()
-#        }
+#        @compiled.push:  self.compile( $source-name, %info<cache-key>, %info<path>, %info<status> );
+        @compilations.push: ( $source-name, %info<cache-key>, %info<path>, %info<status> );
+        @threads.push( start
+            sub ( @queue ) {
+                my @params = @queue.pop.list if @queue;
+                return unless +@params;
+                my $res = self.compile( |@params );
+                $!lock.protect({
+                    @compiled.append: $res;
+                });
+                &?ROUTINE( @queue )
+            }( @compilations )
+        )  if +@threads < $!threads - 2;
     }
-#    @compiled.append: await @compilations;
+    await @threads;
     for @compiled {
         if .<error>.defined {
             @!error-messages.push: .<error>;
