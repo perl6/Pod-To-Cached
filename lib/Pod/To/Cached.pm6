@@ -318,7 +318,7 @@ method save-index {
             else {
                 take $fn => (
                     :cache-key(%inf<cache-key>),
-                    :status( %inf<status> ),
+                    :status( '"' ~ %inf<status> ~ '"' ),
                     :added( %inf<added> ),
                     :path(%inf<path>),
                 ).hash
