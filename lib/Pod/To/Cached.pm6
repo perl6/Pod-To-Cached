@@ -311,7 +311,7 @@ method save-index {
             if $!frozen {
                 take $fn => (
                     :cache-key(%inf<cache-key>),
-                    :status( Current ),
+                    :status( "Current" ),
                     :added( %inf<added> ),
                 ).hash
             }
