@@ -147,7 +147,6 @@ submethod TWEAK {
         my %config;
         try {
 	    my $config-content = ("$!path/"~INDEX).IO.slurp;
-	    note "Config-content $config-content";
             %config = from-json($config-content);
             CATCH {
                 default {
@@ -318,12 +317,13 @@ method save-index {
             else {
                 take $fn => (
                     :cache-key(%inf<cache-key>),
-                    :status( '"' ~ %inf<status> ~ '"' ),
+                    :status( %inf<status> ),
                     :added( %inf<added> ),
                     :path(%inf<path>),
                 ).hash
             }
         } ).hash );
+    note "hash-h is ",  %h;
     %h<source> = $!source unless $!frozen;
     ("$!path/"~INDEX).IO.spurt: to-json(%h);
 }
