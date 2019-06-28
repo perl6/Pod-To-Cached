@@ -129,7 +129,7 @@ ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache 
 
     =end pod
     POD-CONTENT
-say DOC;
+note DOC;
 $cache .= new( :source( DOC ), :path( REP ));
 #--MARKER-- Test 21
 is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Valid').hash, 'One current, one tainted';
