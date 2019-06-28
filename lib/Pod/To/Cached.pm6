@@ -146,7 +146,9 @@ submethod TWEAK {
         die '$!path has corrupt doc-cache' unless ("$!path/"~INDEX).IO ~~ :f;
         my %config;
         try {
-            %config = from-json(("$!path/"~INDEX).IO.slurp);
+	    my $config-content = ("$!path/"~INDEX).IO.slurp;
+	    say "Config-content $config-content";
+            %config = from-json($config-content);
             CATCH {
                 default {
                     die "Configuration failed with: " ~ .message;
