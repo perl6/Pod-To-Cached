@@ -38,8 +38,6 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
     multi method load(
         CompUnit::PrecompilationId $id,
         IO::Path :$source,
-        Str :$checksum is copy,
-        Instant :$since,
         CompUnit::PrecompilationStore :@precomp-stores = Array[CompUnit::PrecompilationStore].new($.store),
     ) {
         my $compiler-id = CompUnit::PrecompilationId.new-without-check($*PERL.compiler.id);
