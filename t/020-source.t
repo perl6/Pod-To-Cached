@@ -13,6 +13,8 @@ plan 36;
 
 my Pod::To::Cached $cache;
 
+rmtree DOC if DOC.IO ~~ :d;
+
 mktree DOC; # It assumes it's not there before, fails if it does - JJ
 #--MARKER-- Test 1
 throws-like { $cache .= new( :source( DOC ), :path( REP ) ) },
