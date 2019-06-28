@@ -10,7 +10,6 @@ constant INDEX = REP ~ '/file-index.json';
 plan 9;
 
 #--MARKER-- Test 1
-use-ok 'Pod::To::Cached';
 
 use Pod::To::Cached;
 
