@@ -14,6 +14,7 @@ plan 36;
 my Pod::To::Cached $cache;
 
 rmtree DOC if DOC.IO ~~ :d;
+rmtree REP if REP.IO ~~ :d;
 
 mktree DOC; # It assumes it's not there before, fails if it does - JJ
 #--MARKER-- Test 1
