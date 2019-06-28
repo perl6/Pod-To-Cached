@@ -142,10 +142,7 @@ submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False )
 }
 
 submethod TWEAK {
-    self.get-cache;
-}
 
-method get-cache {
     if $!path.IO ~~ :d {
         # cache path exists, so assume it should contain a cache
         die '$!path has corrupt doc-cache' unless ("$!path/"~INDEX).IO ~~ :f;
