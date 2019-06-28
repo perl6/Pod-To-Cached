@@ -1,6 +1,5 @@
 unit class Pod::To::Cached;
 
-use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
 use nqp;
 use JSON::Fast;
