@@ -120,14 +120,13 @@ $cache.freeze;
 =end pod
 
 constant INDEX = 'file-index.json';
-enum Status  is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
+enum Status is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
 
 has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
 has @.extensions = <pod pod6>;
 has Bool $.verbose is rw;
 has $.precomp;
-has $.precomp-store;
 has %.files;
 has @!pods;
 has Bool $.frozen = False;
@@ -182,8 +181,8 @@ submethod TWEAK {
         mktree $!path;
         self.save-index;
     }
-    $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
-    $!precomp = CompUnit::PrecompilationRepository::Document.new(store => $!precomp-store);
+    my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
+    $!precomp = CompUnit::PrecompilationRepository::Document.new(store => $precomp-store);
     # get handles for all Valid / Current files
 
     for %!files.kv -> $nm, %info {
