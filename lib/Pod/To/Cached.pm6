@@ -323,8 +323,8 @@ method save-index {
                 ).hash
             }
         } ).hash );
-    note "hash-h is ",  %h;
     %h<source> = $!source unless $!frozen;
+    note to-json(%h);
     ("$!path/"~INDEX).IO.spurt: to-json(%h);
 }
 
