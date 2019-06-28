@@ -1,4 +1,4 @@
-use lib 'lib';
+use lib 'lib'; # -*- mode: perl6 -*-
 use Test;
 use Test::Output;
 use File::Directory::Tree;
@@ -13,7 +13,7 @@ plan 36;
 
 my Pod::To::Cached $cache;
 
-mktree DOC;
+mktree DOC; # It assumes it's not there before, fails if it does - JJ
 #--MARKER-- Test 1
 throws-like { $cache .= new( :source( DOC ), :path( REP ) ) },
     Exception, :message(/'No POD files found under'/), 'Detects absence of source files';
@@ -127,6 +127,7 @@ ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache 
 
     =end pod
     POD-CONTENT
+say DOC;
 $cache .= new( :source( DOC ), :path( REP ));
 #--MARKER-- Test 21
 is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Valid').hash, 'One current, one tainted';

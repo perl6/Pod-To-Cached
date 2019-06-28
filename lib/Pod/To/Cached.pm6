@@ -147,7 +147,7 @@ submethod TWEAK {
         my %config;
         try {
 	    my $config-content = ("$!path/"~INDEX).IO.slurp;
-	    say "Config-content $config-content";
+#	    say "Config-content $config-content";
             %config = from-json($config-content);
             CATCH {
                 default {
