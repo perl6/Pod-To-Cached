@@ -23,5 +23,5 @@
         "File::Directory::Tree"
     ],
     "source-type" : "git",
-    "source-url" : "git://github.com/finanalyst/pod-cached.git"
+    "source-url" : "https://github.com/finanalyst/pod-cached.git"
 }
