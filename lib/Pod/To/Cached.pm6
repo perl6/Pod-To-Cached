@@ -166,11 +166,13 @@ submethod TWEAK {
             die "Invalid index file"
                 unless %config<source>:exists;
             $!source = %config<source>;
+            say %!files;
             %!files.map( {
-                .value<status> = Status( .value<status> ) ;
+                .value<status> = Status( Status.enums{ .value<status> } ) ;
                 .value<added> = DateTime.new( .value<added> ).Instant
             })
         }
+        say %!files;
         die "Source verification failed with:\n" ~ @!error-messages.join("\n\t")
             unless self.verify-source; # note a frozen cache always returns True
     }
@@ -324,7 +326,6 @@ method save-index {
             }
         } ).hash );
     %h<source> = $!source unless $!frozen;
-    note to-json(%h);
     ("$!path/"~INDEX).IO.spurt: to-json(%h);
 }
 

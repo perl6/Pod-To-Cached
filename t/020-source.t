@@ -123,15 +123,16 @@ is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'
 ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache ok';
 
 (DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
-    =begin pod
-    =TITLE More and more
+=begin pod
+=TITLE More and more
 
-    Some more text but now it is changed
+Some more text but now it is changed
 
-    =end pod
-    POD-CONTENT
-note DOC;
+=end pod
+POD-CONTENT
+
 $cache .= new( :source( DOC ), :path( REP ));
+
 #--MARKER-- Test 21
 is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Valid').hash, 'One current, one tainted';
 #--MARKER-- Test 22
