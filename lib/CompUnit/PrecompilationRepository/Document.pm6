@@ -34,7 +34,7 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             Nil
     }
 
-    #| Loads a file, returns a handle for precompiled file and checksum
+    #| Loads a file, returns a handle for precompiled file and checksum. Needs an $id for the precompilation unit, an IO::Path and an array of Compunit::Precompilation store that is assigned by default
     multi method load(
         CompUnit::PrecompilationId $id,
         IO::Path :$source,
