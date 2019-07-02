@@ -1,6 +1,5 @@
 unit class Pod::To::Cached;
 
-use MONKEY-SEE-NO-EVAL;
 use File::Directory::Tree;
 use nqp;
 use JSON::Fast;
@@ -121,14 +120,13 @@ $cache.freeze;
 =end pod
 
 constant INDEX = 'file-index.json';
-enum Status  is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
+enum Status is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
 
 has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
 has @.extensions = <pod pod6>;
 has Bool $.verbose is rw;
 has $.precomp;
-has $.precomp-store;
 has %.files;
 has @!pods;
 has Bool $.frozen = False;
@@ -142,16 +140,14 @@ submethod BUILD( :$!source = 'doc', :$!path = '.pod-cache', :$!verbose = False )
 }
 
 submethod TWEAK {
-    self.get-cache;
-}
 
-method get-cache {
     if $!path.IO ~~ :d {
         # cache path exists, so assume it should contain a cache
         die '$!path has corrupt doc-cache' unless ("$!path/"~INDEX).IO ~~ :f;
         my %config;
         try {
-            %config = from-json(("$!path/"~INDEX).IO.slurp);
+	    my $config-content = ("$!path/"~INDEX).IO.slurp;
+            %config = from-json($config-content);
             CATCH {
                 default {
                     die "Configuration failed with: " ~ .message;
@@ -171,7 +167,7 @@ method get-cache {
                 unless %config<source>:exists;
             $!source = %config<source>;
             %!files.map( {
-                .value<status> = Status( .value<status> ) ;
+                .value<status> = Status( Status.enums{ .value<status> } ) ;
                 .value<added> = DateTime.new( .value<added> ).Instant
             })
         }
@@ -186,8 +182,8 @@ method get-cache {
         mktree $!path;
         self.save-index;
     }
-    $!precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
-    $!precomp = CompUnit::PrecompilationRepository::Document.new(store => $!precomp-store);
+    my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
+    $!precomp = CompUnit::PrecompilationRepository::Document.new(store => $precomp-store);
     # get handles for all Valid / Current files
 
     for %!files.kv -> $nm, %info {
@@ -314,7 +310,7 @@ method save-index {
             if $!frozen {
                 take $fn => (
                     :cache-key(%inf<cache-key>),
-                    :status( Current ),
+                    :status( "Current" ),
                     :added( %inf<added> ),
                 ).hash
             }

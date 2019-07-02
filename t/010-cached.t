@@ -2,17 +2,14 @@
 use lib 'lib';
 use Test;
 use File::Directory::Tree;
+use Pod::To::Cached;
 
 constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-plan 9;
+plan 8;
 
-#--MARKER-- Test 1
-use-ok 'Pod::To::Cached';
-
-use Pod::To::Cached;
 
 if 't/tmp'.IO ~~ :d  {
     empty-directory 't/tmp';

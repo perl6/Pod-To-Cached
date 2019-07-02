@@ -1,6 +1,7 @@
 use v6.*;
 use nqp;
 class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRepository::Default {
+    
     method !load-handle-for-path(CompUnit::PrecompilationUnit $unit) {
             my $preserve_global := nqp::ifnull(nqp::gethllsym('perl6', 'GLOBAL'), Mu);
             if $*RAKUDO_MODULE_DEBUG -> $RMD { $RMD("Loading precompiled\n$unit") }
@@ -15,6 +16,7 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             }
             $handle
         }
+
     method !load-file(
             CompUnit::PrecompilationStore @precomp-stores,
             CompUnit::PrecompilationId $id,
@@ -31,36 +33,20 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             }
             Nil
     }
+
+    #| Loads a file, returns a handle for precompiled file and checksum. Needs an $id for the precompilation unit, an IO::Path and an array of Compunit::Precompilation store that is assigned by default
     multi method load(
         CompUnit::PrecompilationId $id,
         IO::Path :$source,
-        Str :$checksum is copy,
-        Instant :$since,
         CompUnit::PrecompilationStore :@precomp-stores = Array[CompUnit::PrecompilationStore].new($.store),
     ) {
-#        $loaded-lock.protect: {
-#            return %loaded{$id} if %loaded{$id}:exists;
-#        }
-#        my $RMD = $*RAKUDO_MODULE_DEBUG;
         my $compiler-id = CompUnit::PrecompilationId.new-without-check($*PERL.compiler.id);
         my $unit = self!load-file(@precomp-stores, $id);
         if $unit {
-#            if (not $since or $unit.modified > $since)
-#                and (not $source or ($checksum //= nqp::sha1($source.slurp(:enc<iso-8859-1>))) eq $unit.source-checksum)
-#                and self!load-dependencies($unit, @precomp-stores)
-#            {
-#                my \loaded = ;
-#                $loaded-lock.protect: { %loaded{$id} = loaded };
-#                return (loaded, $unit.checksum);
-                return (self!load-handle-for-path($unit), $unit.checksum);
-            }
-            else {
-#                $RMD("Outdated precompiled {$unit}{$source ?? " for $source" !! ''}\n"
-#                     ~ "    mtime: {$unit.modified}{$since ?? ", since: $since" !! ''}\n"
-#                     ~ "    checksum: {$unit.source-checksum}, expected: $checksum") if $RMD;
-                $unit.close;
-#                fail "Outdated precompiled $unit";
-#            }
+            return (self!load-handle-for-path($unit), $unit.checksum);
+        }
+        else {
+            $unit.close;
         }
         Nil
     }

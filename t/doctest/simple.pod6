@@ -1,0 +1,7 @@
+=begin pod
+
+=TITLE powerfull cache
+
+Perl6 is quite awesome.
+
+=end pod
