@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="facf6b6c-f223-4e7b-810a-23ee6d6981a9" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/META6.json" beforeDir="false" afterPath="$PROJECT_DIR$/META6.json" afterDir="false" />
-    </list>
+    <list default="true" id="facf6b6c-f223-4e7b-810a-23ee6d6981a9" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,11 +11,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="META6.json" pinned="false" current-in-tab="true">
+      <file leaf-file-name="META6.json" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/META6.json">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="144">
               <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="020-source.t" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/t/020-source.t">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="408">
+              <caret line="133" column="16" lean-forward="true" selection-start-line="133" selection-start-column="16" selection-end-line="133" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="00-load.t" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/t/00-load.t">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="72">
+              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
             </state>
           </provider>
         </entry>
@@ -47,7 +61,22 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="pod-cached" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pod-cached" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="pod-cached" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pod-cached" type="462c0819:PsiDirectoryNode" />
+              <item name="t" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="Scope" />
     </panes>
   </component>
@@ -66,6 +95,11 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="tests-pod-cache" type="PERL6_TEST_CONFIGURATION" factoryName="Perl 6 test">
+      <PARALELLISM_DEGREE>1</PARALELLISM_DEGREE>
+    </configuration>
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -79,18 +113,44 @@
     </task>
     <servers />
   </component>
+  <component name="TestHistory">
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 36m 38s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 40m 34s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 40m 35s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 40m 39s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 41m 55s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 43m 03s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 43m 19s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+    <history-entry file="tests-pod-cache - 2019.07.17 at 19h 43m 40s.xml">
+      <configuration name="tests-pod-cache" configurationId="PERL6_TEST_CONFIGURATION" />
+    </history-entry>
+  </component>
   <component name="ToolWindowManager">
     <frame x="0" y="34" width="1920" height="1046" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18229167" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18229167" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
-      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32925472" />
       <window_info anchor="bottom" id="Version Control" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39933258" />
       <window_info id="Favorites" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -104,11 +164,36 @@
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="perl6LineBreakpoint">
+          <url>file://$PROJECT_DIR$/t/020-source.t</url>
+          <line>133</line>
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="1" />
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/META6.json">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
           <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/t/00-load.t">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/t/020-source.t">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="408">
+          <caret line="133" column="16" lean-forward="true" selection-start-line="133" selection-start-column="16" selection-end-line="133" selection-end-column="16" />
         </state>
       </provider>
     </entry>
