@@ -1,3 +1,5 @@
 lib/.precomp/*
 .precomp/*
 t/tmp/
+
+workspace.xml
