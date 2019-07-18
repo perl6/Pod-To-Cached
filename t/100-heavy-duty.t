@@ -47,7 +47,7 @@ $start2 = now;
 $cache .= new(:path<t/tmp/ref>, :source<t/tmp/doc>);
 $cache.update-cache ;
 $stop2 = now;
-#--MARKER-- Test 6
+#--MARKER-- Test 5
 is +$cache.list-files( 'Current' ), HEAVY-RUN, HEAVY-RUN ~ ' files cached as compiled';
 
 diag "Dry run took " ~ DateTime.new($stop1 - $start1).hh-mm-ss ~ '. Heavy run took ' ~ DateTime.new($stop2-$start2).hh-mm-ss;

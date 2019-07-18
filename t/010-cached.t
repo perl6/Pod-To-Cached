@@ -22,7 +22,7 @@ my Pod::To::Cached $cache;
 
 mktree REP;
 
-#--MARKER-- Test 2
+#--MARKER-- Test 1
 throws-like { $cache .= new(:source( DOC ), :path(REP)) },
     Exception, :message(/'has corrupt doc-cache'/), 'Detects absence of index file';
 
@@ -33,7 +33,7 @@ INDEX.IO.spurt(q:to/CONTENT/);
     }
 CONTENT
 
-#--MARKER-- Test 3
+#--MARKER-- Test 2
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Configuration failed'/), 'Bad JSON in index file';
 
@@ -44,7 +44,7 @@ INDEX.IO.spurt(q:to/CONTENT/);
             "source": "SOURCE"
         }
     CONTENT
-#--MARKER-- Test 4
+#--MARKER-- Test 3
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Invalid index file'/), 'Files not hash';
 
@@ -54,7 +54,7 @@ INDEX.IO.spurt(q:to/CONTENT/);
             "source": "SOURCE"
         }
     CONTENT
-#--MARKER-- Test 5
+#--MARKER-- Test 4
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Invalid index file'/), 'No frozen';
 
@@ -64,7 +64,7 @@ INDEX.IO.spurt(q:to/CONTENT/);
             "source": "SOURCE"
         }
     CONTENT
-#--MARKER-- Test 6
+#--MARKER-- Test 5
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Invalid index file'/), 'No files';
 
@@ -87,7 +87,7 @@ INDEX.IO.spurt(q:to/CONTENT/);
              }
         }
     CONTENT
-#--MARKER-- Test 7
+#--MARKER-- Test 6
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Invalid index file'/), 'No source without frozen';
 
@@ -111,13 +111,13 @@ INDEX.IO.spurt(q:to/CONTENT/);
             "source": "t/tmp/doc"
         }
     CONTENT
-#--MARKER-- Test 8
+#--MARKER-- Test 7
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'Source verification failed'/), 'No source directory at source in index';
 
 # TODO source-verify with frozen cache
 rmtree REP ;
 
-#--MARKER-- Test 9
+#--MARKER-- Test 8
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'is not a directory'/), 'Detects absence of source directory';
