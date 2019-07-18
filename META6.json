@@ -1,7 +1,7 @@
 {
     "perl" : "6.*",
     "name" : "Pod::To::Cached",
-    "version" : "0.3.0",
+    "version" : "0.3.1",
     "authors" : "Richard Hainsworth",
     "description" : "Precompile a collection of pod files into a cache.",
     "license" : "Artistic-2.0",
@@ -19,7 +19,7 @@
     "test-depends" : [
         "Test",
         "Test::Output",
-        "JSON::Fast",
+        "JSON::Fast:ver<0.9.18+>",
         "File::Directory::Tree"
     ],
     "source-type" : "git",
