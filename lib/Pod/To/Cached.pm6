@@ -167,7 +167,7 @@ submethod TWEAK {
                 unless %config<source>:exists;
             $!source = %config<source>;
             %!files.map( {
-                .value<status> = Status(  .value<status>  ) ;
+                .value<status> = Status( Status.enums{ .value<status> } ) ;
                 .value<added> = DateTime.new( .value<added> ).Instant
             })
         }
