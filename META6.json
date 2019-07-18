@@ -9,7 +9,7 @@
   "auth": "finanalyst",
   "depends": [
     "File::Directory::Tree",
-    "JSON::Fast"
+    "JSON::Fast:ver<0.9.18+>"
   ],
   "test-depends": [
     "Test",
