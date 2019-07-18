@@ -1,4 +1,4 @@
-# Pod::Cached
+# Pod::To::Cached
 
 Create and Maintain a cache of precompiled pod files
 
@@ -9,24 +9,24 @@ to add a pod file to a cache.
 
 This module is in the [Perl 6 ecosystem](https://modules.perl6.org), so you install it in the usual way:
 
-    zef install Pod::Cached
+    zef install Pod::To::Cached
 
 
 # SYNOPSIS
 ```perl6
-use Pod::Cached;
+use Pod::To::Cached;
 
-my Pod::Cached $cache .= new(:path<path-to-cache>, :source<path-to-directory-with-pod-files>);
+my Pod::To::Cached $cache .= new(:path<path-to-cache>, :source<path-to-directory-with-pod-files>);
 
 $cache.update-cache;
 
 for $cache.list-files( :all ).kv -> $filename, $status {
     given $status {
-        when Pod::Cached::Valid {say "$filename has valid cached POD"}
-        when Pod::Cached::Updated {say "$filename has valid POD, just updated"}
-        when Pod::Cached::Tainted {say "$filename has been modified since the cache was last updated"}
-        when Pod::Cached::Failed {say "$filename has been modified, but contains invalid POD"}
-        when Pod::Cached::New {say "$filename has not yet been added to pod-cache"}
+        when Pod::To::Cached::Valid {say "$filename has valid cached POD"}
+        when Pod::To::Cached::Updated {say "$filename has valid POD, just updated"}
+        when Pod::To::Cached::Tainted {say "$filename has been modified since the cache was last updated"}
+        when Pod::To::Cached::Failed {say "$filename has been modified, but contains invalid POD"}
+        when Pod::To::Cached::New {say "$filename has not yet been added to pod-cache"}
     }
     user-supplied-routine-for-processing-pod( $cache.pod( $filename ) );
 }
