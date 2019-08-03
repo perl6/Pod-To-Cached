@@ -201,6 +201,7 @@ stderr-like {$cache .=new(:path(REP),:verbose)}, /
     'names not associated with pod files:'
     .+ 'pod-file-to-deprecate'
     /, 'detects old files';
+
 $cache.verbose = False;
 $cache.update-cache;
 #--MARKER-- Test 35
@@ -216,6 +217,7 @@ is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'
     POD-CONTENT
 
 $cache .= new( :source( DOC ), :path( REP ));
+#--MARKER-- Test 36
 is-deeply $cache.hash-files(<Valid Old>), %( 'a-pod-file' => 'Valid', 'pod-file-to-deprecate' => 'Old'), 'hash-files with seq of statuses correct';
 # remove rep with old source
 rmtree REP;

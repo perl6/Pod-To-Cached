@@ -84,10 +84,10 @@ $cache.freeze;
     update-cache will throw an error if used on a frozen cache
 
 =item list-files( Str $s --> Positional )
-    returns an Sequence of files with the given status
+    returns a Sequence of files with the given status
 
 =item list-files( Str $s1, $s2 --> Positional )
-    returns an Array of files with the given status list
+    returns a Sequence of files with the given status list
 
 =item hash-files( *@statuses? --> Associative )
     returns a map of the source-name and its statuses

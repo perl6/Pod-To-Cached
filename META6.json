@@ -1,28 +1,27 @@
 {
-  "name": "Pod::To::Cached",
-  "description": "Precompile a collection of pod files into a cache.",
-  "version": "0.3.0",
-  "perl": "6.*",
-  "authors": [
-    "Richard Hainsworth"
-  ],
-  "auth": "finanalyst",
-  "depends": [
-    "File::Directory::Tree",
-    "JSON::Fast"
-  ],
-  "test-depends": [
-    "Test",
-    "Test::Output"
-  ],
-  "provides": {
-    "CompUnit::PrecompilationRepository::Document": "lib/CompUnit/PrecompilationRepository/Document.pm6",
-    "Pod::To::Cached": "lib/Pod/To/Cached.pm6"
-  },
-  "support": {
-    "source": "https://github.com/finanalyst/pod-cached/issues"
-  },
-  "license": "Artistic-2.0",
-  "source-url": "https://github.com/finanalyst/pod-cached.git",
-  "source-type": "git"
+    "perl" : "6.*",
+    "name" : "Pod::To::Cached",
+    "version" : "0.3.2",
+    "authors" : "Richard Hainsworth",
+    "description" : "Precompile a collection of pod files into a cache.",
+    "license" : "Artistic-2.0",
+    "provides" : {
+        "Pod::To::Cached" : "lib/Pod/To/Cached.pm6",
+        "CompUnit::PrecompilationRepository::Document": "lib/CompUnit/PrecompilationRepository/Document.pm6"
+    },
+    "support" : {
+        "source" : "https://github.com/finanalyst/pod-cached/issues"
+    },
+    "depends" : [
+        "File::Directory::Tree",
+        "JSON::Fast"
+        ],
+    "test-depends" : [
+        "Test",
+        "Test::Output",
+        "JSON::Fast:ver<0.9.18+>",
+        "File::Directory::Tree"
+    ],
+    "source-type" : "git",
+    "source-url" : "https://github.com/finanalyst/pod-cached.git"
 }
