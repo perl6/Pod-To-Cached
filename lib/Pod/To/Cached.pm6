@@ -5,6 +5,8 @@ use nqp;
 use JSON::Fast;
 use CompUnit::PrecompilationRepository::Document;
 
+constant @extensions = <pod pod6>;
+
 =begin pod
 
 =TITLE Pod::To::Cached
@@ -54,7 +56,7 @@ $cache.freeze;
     path to the collection of pod files
     ignored if cache frozen
 
-=item @!extensions = <pod pod6>
+=item constant @extensions = <pod pod6>
     the possible extensions for a POD file
 
 =item verbose = False
@@ -102,7 +104,7 @@ $cache.freeze;
 =item pod
     method pod(Str $source)
     Returns an array of POD Objects generated from the file associated with $source name.
-    When a doc-set is being actively updated, then pod files may have failed, in which case they have Status Valid.
+    When a doc-set is being actively updated, then pod files may have failed, in which case they have C<Status> = C<Valid>.
     To froze a cache, all files must have Current status
 
 =item Status is an enum with the following elements and semantics
@@ -124,7 +126,6 @@ enum Status is export <Current Valid Failed New Old>; # New is internally used, 
 
 has Str $.path = '.pod6-cache';
 has Str $.source = 'doc';
-has @.extensions = <pod pod6>;
 has Bool $.verbose is rw;
 has $.precomp;
 has %.files;
@@ -333,7 +334,7 @@ method get-pods {
     #| Recursively finds all pod files
      @!pods = my sub recurse ($dir) {
          gather for dir($dir) {
-             take .Str if  .extension ~~ any( @!extensions );
+             take .Str if  .extension ~~ any( @extensions );
              take slip sort recurse $_ if .d;
          }
      }($!source); # is the first definition of $dir
