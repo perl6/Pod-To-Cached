@@ -66,7 +66,7 @@ install:
             Write-Host (Get-Item -Path ".\" -Verbose).FullName
             Start-FileDownload 'http://rakudo.org/downloads/star/rakudo-star-latest-x86_64%20(JIT).msi' -FileName 'rakudo.msi'
             get-filehash -algorithm md5 'rakudo.msi'
-            msiexec /i rakudo.msi /quiet /qn /norestart /log rakudo-install.log
+            msiexec /i rakudo.msi /qn /norestart /log rakudo-install.log
             Write-Host "Waiting $env:MSIEXEC_WAIT_SECONDS seconds for msiexec to finish"
             Write-Host "Set MSIEXEC_WAIT_SECONDS to change that wait period"
             Start-Sleep -s $env:MSIEXEC_WAIT_SECONDS
