@@ -8,8 +8,9 @@ install:
     - SET PATH=C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;%PATH%
     - git clone https://github.com/tadzik/rakudobrew %USERPROFILE%\rakudobrew
     - SET PATH=%USERPROFILE%\rakudobrew\bin;%PATH%
-    - rakudobrew build moar %TEST_MOAR%
-    - rakudobrew build zef
+    - rakudobrew build moar 2019.07.1
+    - rakudobrew switch moar-2019.07.1
+    - rakudobrew build-zef
     - cd %APPVEYOR_BUILD_FOLDER%
     - zef --depsonly install .
 
@@ -17,6 +18,5 @@ build: off
 
 test_script:
     - zef test .
-
 
 shallow_clone: true
