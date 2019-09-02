@@ -31,7 +31,7 @@ branches:
 
 environment:
     MY_VAR: true
-    MSIEXEC_WAIT_SECONDS: 10
+    MSIEXEC_WAIT_SECONDS: 100
     AUTOMATED_TESTING: 1
     TEST_VERBOSE: 0
     HARNESS_OPTIONS:
