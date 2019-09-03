@@ -30,14 +30,10 @@ branches:
 #   https://metacpan.org/pod/Test::Harness
 
 environment:
-    MY_VAR: true
-    MSIEXEC_WAIT_SECONDS: 100
     AUTOMATED_TESTING: 1
     TEST_VERBOSE: 0
     HARNESS_OPTIONS:
     HARNESS_VERBOSE: 0
-    HARNESS_TIMER: 1
-    HARNESS_PERL_SWITCHES: -MDevel::Cover
 
 install:
     - if not exist "C:\rakudo" cinst rakudostar

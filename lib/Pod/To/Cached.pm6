@@ -5,7 +5,7 @@ use nqp;
 use JSON::Fast;
 use CompUnit::PrecompilationRepository::Document;
 
-constant @extensions = <pod pod6>;
+constant @extensions = <pod pod6 p6 pm pm6>;
 
 constant INDEX = 'file-index.json';
 enum Status is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
@@ -310,7 +310,7 @@ $cache.freeze;
     path to the collection of pod files
     ignored if cache frozen
 
-=item constant @extensions = <pod pod6>
+=item constant @extensions = <pod pod6 p6 pm pm6>
     the possible extensions for a POD file
 
 =item verbose = False
