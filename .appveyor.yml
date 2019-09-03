@@ -40,13 +40,6 @@ environment:
     HARNESS_PERL_SWITCHES: -MDevel::Cover
 
 install:
-    # Install Strawberry Perl with chocolately.
-    # Strawberry Perl comes with `prove`, which we use to run the tests.
-    # http://strawberryperl.com
-    # https://chocolatey.org/packages/StrawberryPerl
-    - if not exist "C:\Strawberry" cinst strawberryperl
-    - SET PATH=C:\strawberry\c\bin;C:\strawberry\perl\site\bin;C:\strawberry\perl\bin;%PATH%
-    - ps: refreshenv
     - if not exist "C:\rakudo" cinst rakudostar
     - SET PATH=C:\rakudo\bin;C:\rakudo\share\perl6\site\bin;%PATH%
     - ps: refreshenv
