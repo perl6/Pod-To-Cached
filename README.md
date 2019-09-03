@@ -1,6 +1,7 @@
 # Pod::To::Cached
 
 [![Build Status](https://travis-ci.com/perl6/Pod-To-Cached.svg?branch=master)](https://travis-ci.com/perl6/Pod-To-Cached)
+[https://ci.appveyor.com/api/projects/status/github/perl6/Pod-To-Cached?svg=true](https://ci.appveyor.com/api/projects/status/github/perl6/Pod-To-Cached?svg=true)
 
 Create and Maintain a cache of precompiled pod files
 
