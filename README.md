@@ -1,5 +1,7 @@
 # Pod::To::Cached
 
+[![Build Status](https://travis-ci.com/perl6/Pod-To-Cached.svg?branch=master)](https://travis-ci.com/perl6/Pod-To-Cached)
+
 Create and Maintain a cache of precompiled pod files
 
 Module to take a collection of pod files and create a precompiled cache. Methods / functions
