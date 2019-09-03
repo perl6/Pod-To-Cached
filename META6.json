@@ -17,9 +17,9 @@
     "Pod::To::Cached": "lib/Pod/To/Cached.pm6"
   },
   "support": {
-    "source": "https://github.com/finanalyst/pod-cached/issues"
+    "source": "https://github.com/perl6/Pod-To-Cached/issues"
   },
   "license": "Artistic-2.0",
-  "source-url": "https://github.com/finanalyst/pod-cached.git",
+  "source-url": "https://github.com/perl6/Pod-To-Cached.git",
   "source-type": "git"
 }
