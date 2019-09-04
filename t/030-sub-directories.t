@@ -2,7 +2,6 @@ use lib 'lib';
 use Test;
 use Test::Output;
 use JSON::Fast;
-use File::Directory::Tree;
 use Pod::To::Cached;
 
 constant REP = 't/tmp/ref';
