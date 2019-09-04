@@ -247,7 +247,7 @@ multi method hash-files( @statuses --> Hash ) {
 }
 
 method cache-timestamp( $source --> Instant ) {
-    %.files{ $source }<added>
+    %!files{ $source }<added>
 }
 
 method freeze( --> Bool ) {
