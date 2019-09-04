@@ -1,5 +1,5 @@
 lib/.precomp/*
 .precomp/*
 t/tmp/
-
+.pod-cache
 workspace.xml
