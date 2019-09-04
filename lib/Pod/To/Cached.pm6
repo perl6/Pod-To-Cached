@@ -264,7 +264,7 @@ method freeze( --> Bool ) {
 method rm-cache() {
     if $*SPEC ~~ IO::Spec::Win32 {
         my $win-path = "$*CWD/$!path".trans( ["/"] => ["\\"] );
-        shell "rm $win-path\.lock";
+        shell "rm $win-path\\.lock";
         shell "rmdir /S /Q $win-path" ;
         shell "rmdir $win-path";
     } else {
