@@ -47,7 +47,6 @@ like $cache.pod('a-second-pod-file')[0].contents[1].contents[0], /'Some more tex
 #--MARKER-- Test 8
 lives-ok { $cache.freeze }, 'All updated so now can freeze';
 
-#rmtree DOC;
 #--MARKER-- Test 9
 lives-ok { $cache .=new(:path( REP )) }, 'Gets a frozen cache without source';
 
