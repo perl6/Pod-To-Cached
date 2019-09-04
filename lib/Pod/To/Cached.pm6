@@ -263,7 +263,9 @@ method freeze( --> Bool ) {
 
 method rm-cache() {
     if $*SPEC ~~ IO::Spec::Win32 {
-        shell "dir; rmdir /S /Q \"" ~ $!path.trans( ["/"] => ["\\"] ) ~ "\"";
+        shell "dir";
+        shell 'echo %cd%';
+        shell "rmdir /S /Q \"" ~ $!path.trans( ["/"] => ["\\"] ) ~ "\"";
     } else {
         shell "rm -rf $!path";
     }

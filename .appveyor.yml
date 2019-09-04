@@ -17,7 +17,6 @@ platform: x64
 # If the build is successful, AppVeyor caches these files and
 # directories for future builds
 cache:
-    - C:\Strawberry -> .appveyor_clear_cache.txt
     - C:\Rakudo -> .appveyor_clear_cache.txt
 
 branches:
