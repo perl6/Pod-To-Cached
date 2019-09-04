@@ -128,7 +128,7 @@ subtest "Update cache", {
 is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'Current').hash, 'hash-files shows two pod Current';
 
 #--MARKER-- Test 20
-ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because update cache ok';
+ok INDEX.IO.modified > $mod-time, 'INDEX has been modified because updated cache ok';
 
 (DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
 =begin pod

@@ -1,8 +1,8 @@
 use lib 'lib';
 use Test;
 use Test::Output;
-use File::Directory::Tree;
 use JSON::Fast;
+use File::Directory::Tree;
 use Pod::To::Cached;
 
 constant REP = 't/tmp/ref';
@@ -17,7 +17,7 @@ my $content = q:to/PODEND/;
     PODEND
 
 for <sub-dir-1 sub-dir-2 sub-dir-3> -> $d {
-    mktree DOC ~ "/$d";
+    mkdir DOC ~ "/$d";
     (DOC ~ "/$d/a-file-$_.pod6").IO.spurt($content) for 1..4
 }
 
