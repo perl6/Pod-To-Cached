@@ -1,6 +1,5 @@
 unit class Pod::To::Cached;
 
-use File::Directory::Tree;
 use nqp;
 use JSON::Fast;
 use CompUnit::PrecompilationRepository::Document;
@@ -63,7 +62,7 @@ submethod TWEAK {
         $!frozen = False;
         die "Source verification failed with:\n" ~ @!error-messages.join("\n\t")
             unless self.verify-source;
-        mktree $!path;
+        mkdir IO::Path.new( $!path );
         self.save-index;
     }
     my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
