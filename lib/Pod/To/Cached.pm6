@@ -261,6 +261,14 @@ method freeze( --> Bool ) {
     self.save-index;
 }
 
+method rm-cache() {
+    if $*SPEC ~~ IO::Spec::Win32 {
+        shell "rmdir /S /Q $.path";
+    } else {
+        shell "rm -rf $.path";
+    }
+}
+
 =begin pod
 
 =TITLE Pod::To::Cached
