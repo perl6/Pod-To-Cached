@@ -228,8 +228,7 @@ is-deeply $cache.hash-files, ( 'a-pod-file' => 'Current', 'a-second-pod-file'=>'
 $cache .= new( :source( DOC ), :path( REP ));
 #--MARKER-- Test 36
 is-deeply $cache.hash-files(<Valid Old>), %( 'a-pod-file' => 'Valid', 'pod-file-to-deprecate' => 'Old'), 'hash-files with seq of statuses correct';
-# remove rep with old source
-$cache.rm-cache;
+
 #restore valid source file for later tests.
 (DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
     =begin pod

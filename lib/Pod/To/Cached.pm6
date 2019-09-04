@@ -149,7 +149,7 @@ method update-cache( --> Bool ) {
 
 method compile( $source-name, $key, $path, $status is copy ) {
     note "Caching $source-name" if $!verbose;
-    my ($handle , $error, $added);
+    my ($handle, $error, $added);
     try {
         CATCH {
             default {
@@ -261,14 +261,12 @@ method freeze( --> Bool ) {
     self.save-index;
 }
 
-method rm-cache() {
+sub rm-cache( $path ) is export {
     if $*SPEC ~~ IO::Spec::Win32 {
-        my $win-path = "$*CWD/$!path".trans( ["/"] => ["\\"] );
-        shell "rm $win-path\\.lock";
+        my $win-path = "$*CWD/$path".trans( ["/"] => ["\\"] );
         shell "rmdir /S /Q $win-path" ;
-        shell "rmdir $win-path";
     } else {
-        shell "rm -rf $!path";
+        shell "rm -rf $path";
     }
 }
 
