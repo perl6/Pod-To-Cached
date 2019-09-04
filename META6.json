@@ -1,14 +1,14 @@
 {
   "name": "Pod::To::Cached",
   "description": "Precompile a collection of pod files into a cache.",
-  "version": "0.3.5",
+  "version": "0.4.0",
   "perl": "6.*",
   "authors": "Richard Hainsworth",
   "depends": [
-    "File::Directory::Tree",
     "JSON::Fast:ver<0.9.18+>"
   ],
   "test-depends": [
+    "File::Directory::Tree",
     "Test::Output"
   ],
   "provides": {
