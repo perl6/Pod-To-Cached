@@ -5,7 +5,7 @@ use nqp;
 use CompUnit::PrecompilationRepository::Document;
 use File::Directory::Tree;
 
-plan 1;
+plan 2;
 
 constant cache-name = "cache";
 my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix =>
