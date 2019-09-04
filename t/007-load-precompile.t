@@ -17,7 +17,7 @@ for <simple sub/simple> -> $doc-name {
     $precomp.precompile("t/doctest/$doc-name.pod6".IO, $key, :force );
     my $handle = $precomp.load($key)[0];
     my $precompiled-pod = nqp::atkey($handle.unit,'$=pod')[0];
-    is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod";
+    is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod $doc-name";
 }
 
 rmtree(cache-name);

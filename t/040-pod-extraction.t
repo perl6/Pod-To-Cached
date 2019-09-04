@@ -43,7 +43,7 @@ throws-like { $cache.freeze }, Exception, :message(/'Cannot freeze because some 
 ok $cache.update-cache, 'updates without problem';
 
 #--MARKER-- Test 7
-like $cache.pod('a-second-pod-file')[0].contents[1].contents[0], /'Some extra changed text but now it is changed'/, 'new version after update';
+like $cache.pod('a-second-pod-file')[0].contents[1].contents[0], /'Some more text but now it is changed'/, 'new version after update';
 #--MARKER-- Test 8
 lives-ok { $cache.freeze }, 'All updated so now can freeze';
 

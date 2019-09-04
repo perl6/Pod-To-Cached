@@ -34,20 +34,20 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             Nil
     }
 
-    #| Loads a file, returns a handle for precompiled file and checksum. Needs an $id for the precompilation unit, an IO::Path and an array of Compunit::Precompilation store that is assigned by default
-    multi method load(
-        CompUnit::PrecompilationId $id,
-        IO::Path :$source,
-        CompUnit::PrecompilationStore :@precomp-stores = Array[CompUnit::PrecompilationStore].new($.store),
-    ) {
-        my $compiler-id = CompUnit::PrecompilationId.new-without-check($*PERL.compiler.id);
-        my $unit = self!load-file(@precomp-stores, $id);
-        if $unit {
-            return (self!load-handle-for-path($unit), $unit.checksum);
-        }
-        else {
-            $unit.close;
-        }
-        Nil
-    }
+#    #| Loads a file, returns a handle for precompiled file and checksum. Needs an $id for the precompilation unit, an IO::Path and an array of Compunit::Precompilation store that is assigned by default
+#    multi method load-x(
+#        CompUnit::PrecompilationId $id,
+#        IO::Path :$source,
+#        CompUnit::PrecompilationStore :@precomp-stores = Array[CompUnit::PrecompilationStore].new($.store),
+#    ) {
+#        my $compiler-id = CompUnit::PrecompilationId.new-without-check($*PERL.compiler.id);
+#        my $unit = self!load-file(@precomp-stores, $id);
+#        if $unit {
+#            return (self!load-handle-for-path($unit), $unit.checksum);
+#        }
+#        else {
+#            $unit.close;
+#        }
+#        Nil
+#    }
 }
