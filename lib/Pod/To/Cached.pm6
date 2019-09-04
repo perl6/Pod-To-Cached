@@ -265,6 +265,7 @@ method rm-cache() {
     if $*SPEC ~~ IO::Spec::Win32 {
         shell "dir";
         shell 'echo %cd%';
+        shell "tree /f";
         shell "rmdir /S /Q \"" ~ $!path.trans( ["/"] => ["\\"] ) ~ "\"";
     } else {
         shell "rm -rf $!path";
