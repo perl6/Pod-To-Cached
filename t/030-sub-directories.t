@@ -17,7 +17,7 @@ my $content = q:to/PODEND/;
     PODEND
 
 for <sub-dir-1 sub-dir-2 sub-dir-3> -> $d {
-    mkdir DOC ~ "/$d";
+    mkdir IO::Path.new( DOC ~ "/$d" );
     (DOC ~ "/$d/a-file-$_.pod6").IO.spurt($content) for 1..4
 }
 
