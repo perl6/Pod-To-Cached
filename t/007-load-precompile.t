@@ -7,23 +7,24 @@ use File::Directory::Tree;
 
 plan 1;
 
-my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => "cache".IO );
+constant cache-name = "cache";
+my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix =>
+        cache-name.IO );
 my $precomp = CompUnit::PrecompilationRepository::Document.new(store => $precomp-store);
 
-constant doc-name = "simple";
-my $key = nqp::sha1(doc-name);
-$precomp.precompile(("t/doctest/" ~ doc-name ~ ".pod6").IO, $key, :force );
-my $handle = $precomp.load($key)[0];
-my $precompiled-pod = nqp::atkey($handle.unit,'$=pod')[0];
+for <simple sub/simple> -> $doc-name {
+    my $key = nqp::sha1($doc-name);
+    $precomp.precompile("t/doctest/$doc-name.pod6".IO, $key, :force );
+    my $handle = $precomp.load($key)[0];
+    my $precompiled-pod = nqp::atkey($handle.unit,'$=pod')[0];
+    is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod";
+}
 
-#--MARKER-- Test 1
-is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod"; 
-
-rmtree("cache"); 
+rmtree(cache-name);
 
 =begin pod
 
-=TITLE powerfull cache
+=TITLE Powerful cache
 
 Perl6 is quite awesome.
 
