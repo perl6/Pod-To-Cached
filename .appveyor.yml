@@ -18,6 +18,7 @@ platform: x64
 # directories for future builds
 cache:
     - C:\Rakudo -> .appveyor_clear_cache.txt
+    - C:\Rakudo\share\perl6 -> META6.json
 
 branches:
     only:
