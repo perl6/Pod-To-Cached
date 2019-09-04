@@ -52,6 +52,7 @@ build: off
 #
 # I'd like to run Devel::Cover and submit to Coveralls too.
 test_script:
+    - tree /f
     - zef test .
 
 shallow_clone: true
