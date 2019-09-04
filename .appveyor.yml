@@ -39,11 +39,7 @@ install:
     - SET PATH=C:\rakudo\bin;C:\rakudo\share\perl6\site\bin;%PATH%
     - ps: refreshenv
     - perl6 -v
-    # install the target distribution's dependencies. You'll need to
-    # maintain your META6.json file in the top-level directory
-    - zef --verbose install .
-    # change back to the target project's clone folder.
-    # Now we should be ready to run the tests
+    - zef install --deps-only .
     - cd %APPVEYOR_BUILD_FOLDER%
 
 build: off
