@@ -266,7 +266,7 @@ method rm-cache() {
         shell "dir";
         shell 'echo %cd%';
         shell "tree /f";
-        shell "rmdir /S /Q \"" ~ $!path.trans( ["/"] => ["\\"] ) ~ "\"";
+        shell "rmdir /S /Q \"" ~ "$*CWD/$!path".trans( ["/"] => ["\\"] ) ~ "\"";
     } else {
         shell "rm -rf $!path";
     }

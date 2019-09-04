@@ -16,7 +16,8 @@ my Pod::To::Cached $cache;
 rmtree DOC if DOC.IO ~~ :d;
 rmtree REP if REP.IO ~~ :d;
 
-mktree DOC;
+mkdir IO::Path.new: DOC;
+
 #--MARKER-- Test 1
 throws-like { $cache .= new( :source( DOC ), :path( REP ) ) },
     Exception, :message(/'No POD files found under'/), 'Detects absence of source files';
