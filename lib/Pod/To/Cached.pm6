@@ -263,7 +263,7 @@ method freeze( --> Bool ) {
 
 method rm-cache() {
     if $*SPEC ~~ IO::Spec::Win32 {
-        shell "deltree \"" ~ "$*CWD/$!path".trans( ["/"] => ["\\"] ) ~ "\"";
+        shell "dir \"" ~ "$*CWD/$!path".trans( ["/"] => ["\\"] ) ~ "\"";
     } else {
         shell "rm -rf $!path";
     }
