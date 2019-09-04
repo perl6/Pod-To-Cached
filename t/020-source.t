@@ -16,7 +16,7 @@ my Pod::To::Cached $cache;
 rmtree DOC if DOC.IO ~~ :d;
 rmtree REP if REP.IO ~~ :d;
 
-mktree DOC; # It assumes it's not there before, fails if it does - JJ
+mktree DOC;
 #--MARKER-- Test 1
 throws-like { $cache .= new( :source( DOC ), :path( REP ) ) },
     Exception, :message(/'No POD files found under'/), 'Detects absence of source files';
@@ -67,16 +67,18 @@ lives-ok { %config = from-json( INDEX.IO.slurp ) }, 'good json in index';
 #--MARKER-- Test 8
 ok (%config<frozen>:exists and %config<frozen> ~~ 'False'), 'frozen is False as expected';
 #--MARKER-- Test 9
-ok (%config<files>:exists
-    and %config<files>.WHAT ~~ Hash)
-    , 'files is as expected';
+subtest "Files test", {
+    ok (%config<files>:exists and %config<files>.WHAT ~~ Hash), 'files is as expected';
+}
 #--MARKER-- Test 10
 is +%config<files>.keys, 0, 'No source files in index because nothing in cache';
 
 my $mod-time = INDEX.IO.modified;
 my $rv;
 #--MARKER-- Test 11
-lives-ok {$rv = $cache.update-cache}, 'Updates cache without dying';
+subtest "Cache updated", {
+    lives-ok {$rv = $cache.update-cache}, 'Updates cache without dying';
+}
 #--MARKER-- Test 12
 nok $rv, 'Returned false because of compile errors';
 #--MARKER-- Test 13
@@ -113,7 +115,13 @@ $cache.verbose = False;
     POD-CONTENT
 
 #--MARKER-- Test 18
-ok $cache.update-cache, 'Returned true because both POD now compile';
+subtest "Update cache", {
+    ok $cache.update-cache, 'Returned true because both POD now compile';
+    %config = from-json( INDEX.IO.slurp ); # Re-reads cache index
+    for <a-pod-file a-second-pod-file> -> $f {
+        ok( %config<files>{$f}<status>, "Status of $f is OK and %config<files>{$f}<status>")
+    }
+}
 # this works because the source paths are in the cache object, and they are new
 
 #--MARKER-- Test 19

@@ -49,10 +49,11 @@ submethod TWEAK {
             die "Invalid index file"
                 unless %config<source>:exists;
             $!source = %config<source>;
-            %!files.map( {
-                .value<status> = Status( Status.enums{ .value<status> } ) ;
-                .value<added> = DateTime.new( .value<added> ).Instant
-            })
+            for %!files.keys -> $f {
+                die "File $f has no status" if !%!files{$f}<status>;
+                %!files{$f}<status> = Status( Status.enums{%!files{$f}<status> }) ;
+                %!files{$f}<added> = DateTime.new( %!files{$f}<added> ).Instant
+            }
         }
         die "Source verification failed with:\n" ~ @!error-messages.join("\n\t")
             unless self.verify-source; # note a frozen cache always returns True
