@@ -7,7 +7,7 @@
     "Richard Hainsworth",
     "JJ Merelo"
   ],
-  "auth": "perl6",
+  "auth": "github:perl6",
   "depends": [
     "JSON::Fast:ver<0.9.18+>"
   ],
