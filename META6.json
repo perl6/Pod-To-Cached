@@ -3,7 +3,10 @@
   "description": "Precompile a collection of pod files into a cache.",
   "version": "0.4.0",
   "perl": "6.*",
-  "authors": "Rich  ard Hainsworth",
+  "authors": [
+    "Richard Hainsworth",
+    "JJ Merelo"
+  ],
   "auth": "perl6",
   "depends": [
     "JSON::Fast:ver<0.9.18+>"
