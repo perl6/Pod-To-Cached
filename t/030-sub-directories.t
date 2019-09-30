@@ -36,6 +36,9 @@ nok 'sub-dir-1' ~~ any( $cache.hash-files.keys ), 'sub-directories filtered from
 't'.IO.&indir( {$cache .= new(:source( 'tmp/doc' ) ) } );
 #--MARKER-- Test 4
 ok 't/.pod-cache'.IO ~~ :d, 'default repository created';
+
 # clean up
-rmtree 't/.pod-cache';
+rm-cache 't/.pod-cache';
+nok 't/.pod-cache'.IO ~~ :d, 'Default directory removed';
+
 done-testing;

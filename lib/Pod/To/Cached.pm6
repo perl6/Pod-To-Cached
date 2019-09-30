@@ -261,6 +261,15 @@ method freeze( --> Bool ) {
     self.save-index;
 }
 
+sub rm-cache( $path ) is export {
+    if $*SPEC ~~ IO::Spec::Win32 {
+        my $win-path = "$*CWD/$path".trans( ["/"] => ["\\"] );
+        shell "rmdir /S /Q $win-path" ;
+    } else {
+        shell "rm -rf $path";
+    }
+}
+
 =begin pod
 
 =TITLE Pod::To::Cached
@@ -372,5 +381,9 @@ $cache.freeze;
     A new pod source has been detected that is not in cache, but C<update-cache> has not yet been called to compile the source. A transitional Status
 =defn Old
     A source name that is in the cache but no longer reflects an existing source.
+
+=item rm-cache
+
+Deletes the whole directory tree that holds the cache in an OS-independent way.
 
 =end pod
