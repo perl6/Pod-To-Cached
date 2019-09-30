@@ -3,6 +3,7 @@ use Test;
 use Test::Output;
 use JSON::Fast;
 use Pod::To::Cached;
+use File::Directory::Tree;
 
 constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
@@ -35,5 +36,6 @@ nok 'sub-dir-1' ~~ any( $cache.hash-files.keys ), 'sub-directories filtered from
 't'.IO.&indir( {$cache .= new(:source( 'tmp/doc' ) ) } );
 #--MARKER-- Test 4
 ok 't/.pod-cache'.IO ~~ :d, 'default repository created';
-
+# clean up
+rmtree 't/.pod-cache';
 done-testing;

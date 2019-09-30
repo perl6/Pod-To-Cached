@@ -3,3 +3,4 @@ lib/.precomp/*
 t/tmp/
 .pod-cache
 workspace.xml
+*.iml

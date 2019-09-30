@@ -2,6 +2,7 @@ use lib 'lib';
 use Test;
 use Test::Output;
 use Pod::To::Cached;
+use File::Directory::Tree;
 
 constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
@@ -12,7 +13,9 @@ plan 11;
 my Pod::To::Cached $cache;
 my $rv;
 diag 'Test pod extraction';
-rm-cache( REP );
+
+rmtree REP;
+
 $cache .= new( :source( DOC ), :path( REP ), :!verbose);
 $cache.update-cache;
 #--MARKER-- Test 1
