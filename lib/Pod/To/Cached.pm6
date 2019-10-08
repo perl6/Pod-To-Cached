@@ -202,7 +202,7 @@ method filter-pods(:@pods) {
     if (IGNORE_FILE.IO.e) {
         my @regexs = IGNORE_FILE.IO.slurp.split("\n", :skip-empty);
         my @filtered = @pods;
-        for @regexs -> $regex { @filtered .= grep(/<{$regex}>/); }
+        for @regexs -> $regex { @filtered .= grep({not /<{$regex}>/}); }
         return @filtered;
     }
     return @pods;
