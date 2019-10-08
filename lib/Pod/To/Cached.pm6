@@ -6,6 +6,7 @@ use CompUnit::PrecompilationRepository::Document;
 
 constant @extensions = <pod pod6 p6 pm pm6>;
 
+constant IGNORE_FILE = ".cache-ignore";
 constant INDEX = 'file-index.json';
 enum Status is export <Current Valid Failed New Old>; # New is internally used, but not stored in DB
 
@@ -197,8 +198,20 @@ method save-index {
     ("$!path/"~INDEX).IO.spurt: to-json(%h);
 }
 
+method filter-pods(:@pods) {
+    if (IGNORE_FILE.IO.e) {
+        my @regexs = IGNORE_FILE.IO.slurp.split("\n", :skip-empty);
+        my @filtered = @pods;
+        for @regexs -> $regex { @filtered .= grep(/<{$regex}>/); }
+        return @filtered;
+    }
+    return @pods;
+}
+
 method get-pods {
-    die 'No pods accessible for a frozen cache' if $!frozen; # should never get here
+    die X::Documentable::TitleNotFound.new(:reason("No pods accessible for a frozen cache"))
+    if $!frozen; # should never get here
+
     return @!pods if @!pods;
     #| Recursively finds all pod files
      @!pods = my sub recurse ($dir) {
@@ -207,6 +220,8 @@ method get-pods {
              take slip sort recurse $_ if .d;
          }
      }($!source); # is the first definition of $dir
+
+    @!pods = self.filter-pods(:@!pods);
 }
 
 method pod( Str $source-name ) is export {
@@ -267,6 +282,15 @@ sub rm-cache( $path ) is export {
         shell "rmdir /S /Q $win-path" ;
     } else {
         shell "rm -rf $path";
+    }
+}
+
+# specific exceptions
+
+class X::Pod::To::Cached::FrozenCache is Exception {
+    has $.reason;
+    method message() {
+        "[FROZEN CACHE] $.reason"
     }
 }
 
