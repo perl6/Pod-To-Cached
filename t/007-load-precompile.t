@@ -26,6 +26,6 @@ rmtree(cache-name);
 
 =TITLE Powerful cache
 
-Perl6 is quite awesome.
+Raku is quite awesome.
 
 =end pod
