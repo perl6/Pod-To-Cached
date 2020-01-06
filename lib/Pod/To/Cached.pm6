@@ -216,6 +216,8 @@ method pod( Str $source-name ) is export {
     nqp::atkey(%!files{$source-name}<handle>.unit,'$=pod');
 }
 
+proto method list-files(| ) {*}
+
 multi method list-files( Str $s --> Positional ) {
     return () unless $s ~~ any(Status.enums.keys);
     gather for %!files.kv -> $pname, %info {
