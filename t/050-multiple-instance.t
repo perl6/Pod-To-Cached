@@ -11,11 +11,10 @@ constant COUNT = 3; # number of caches to create
 
 diag "Create multiple ({ COUNT }) caches";
 
-rmtree REP;
-
 my @caches;
 
 for ^COUNT {
+    rmtree REP ~ $_;
     lives-ok {
         @caches[$_] = Pod::To::Cached.new( :source( DOC ), :path( REP ~ $_ ), :!verbose)
     }, "created cache no $_";
