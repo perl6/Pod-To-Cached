@@ -31,23 +31,18 @@ throws-like { $cache .= new( :source( DOC ), :path( REP ) ) },
     =end pod
     POD-CONTENT
 
-(DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
+my $pod-content = q:to/POD-CONTENT/;
     =pod Another test file
     =TITLE More and more
 
     Some more text
 
     =end pod
-    POD-CONTENT
+POD-CONTENT
+
+(DOC ~ '/a-second-pod-file.pod6').IO.spurt( $pod-content );
 # Change the extension but not the name
-(DOC ~ '/a-second-pod-file.pod').IO.spurt(q:to/POD-CONTENT/);
-    =pod Another test file
-    =TITLE More and more
-
-    Some more text
-
-    =end pod
-    POD-CONTENT
+(DOC ~ '/a-second-pod-file.pod').IO.spurt( $pod-content);
 
 #--MARKER-- Test 2
 throws-like { $cache .= new( :source( DOC ), :path( REP ))},
@@ -69,7 +64,7 @@ lives-ok { %config = from-json( INDEX.IO.slurp ) }, 'good json in index';
 ok (%config<frozen>:exists and %config<frozen> ~~ 'False'), 'frozen is False as expected';
 #--MARKER-- Test 9
 subtest "Files test", {
-    ok (%config<files>:exists and %config<files>.WHAT ~~ Hash), 'files is as expected';
+    ok (%config<files>:exists and %config<files>.WHAT ~~ Hash), 'files key as expected';
 }
 #--MARKER-- Test 10
 is +%config<files>.keys, 0, 'No source files in index because nothing in cache';
