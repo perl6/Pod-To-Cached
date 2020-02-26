@@ -17,7 +17,7 @@ my Pod::To::Cached $cache;
 my $rv;
 diag 'Test pod extraction';
 
-mkdir( DOC );
+mkdir DOC;
 (DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
     =pod A test file
     =TITLE This is a title
@@ -27,10 +27,9 @@ mkdir( DOC );
     =end pod
 POD-CONTENT
 
-mkdir( REP );
-
 $cache .= new( :source( DOC ), :path( REP ), :!verbose);
 $cache.update-cache;
+
 #--MARKER-- Test 1
 ok $cache.pod('a-pod-file')[0] ~~ Pod::Block::Named, 'pod is returned from cache';
 
