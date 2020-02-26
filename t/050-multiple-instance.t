@@ -8,13 +8,18 @@ use File::Directory::Tree;
 constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant COUNT = 3; # number of caches to create
+rmtree DOC if DOC.IO ~~ :d;
+rmtree REP if REP.IO ~~ :d;
+
+mkdir DOC;
+mkdir REP;
 
 diag "Create multiple ({ COUNT }) caches";
 
 my @caches;
 
 for ^COUNT {
-    rmtree REP ~ $_;
+    mkdir REP ~ $_;
     lives-ok {
         @caches[$_] = Pod::To::Cached.new( :source( DOC ), :path( REP ~ $_ ), :!verbose)
     }, "created cache no $_";

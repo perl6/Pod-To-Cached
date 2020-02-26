@@ -8,13 +8,26 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
+rmtree DOC if DOC.IO ~~ :d;
+rmtree REP if REP.IO ~~ :d;
+
 plan 11;
 
 my Pod::To::Cached $cache;
 my $rv;
 diag 'Test pod extraction';
 
-rmtree REP;
+mkdir( DOC );
+(DOC ~ '/a-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
+    =pod A test file
+    =TITLE This is a title
+
+    Some text
+
+    =end pod
+POD-CONTENT
+
+mkdir( REP );
 
 $cache .= new( :source( DOC ), :path( REP ), :!verbose);
 $cache.update-cache;

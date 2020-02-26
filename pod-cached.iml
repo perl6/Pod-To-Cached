@@ -6,5 +6,13 @@
       <sourceFolder url="file://$MODULE_DIR$/t" isTestSource="true" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library name="JSON::Fast:ver&lt;0.9.18+&gt;" type="perl6">
+        <CLASSES />
+        <SOURCES>
+          <root url="raku://-562661043:JSON::Fast:ver&lt;0.9.18+&gt;!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

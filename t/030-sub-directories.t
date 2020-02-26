@@ -9,6 +9,9 @@ constant REP = 't/tmp/ref';
 constant DOC = 't/tmp/doc';
 constant INDEX = REP ~ '/file-index.json';
 
+rmtree DOC if DOC.IO ~~ :d;
+rmtree REP if REP.IO ~~ :d;
+
 my Pod::To::Cached $cache;
 my $content = q:to/PODEND/;
     =begin pod

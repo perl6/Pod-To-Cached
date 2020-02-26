@@ -19,6 +19,6 @@ lives-ok {
 
 say $cache.perl;
 ok (REP).IO.d;
-rmtree REP;
+rmtree REP; # just in case
 
 done-testing;
