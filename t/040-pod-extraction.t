@@ -26,13 +26,6 @@ Some text
 =end pod
 POD-CONTENT
 
-$cache .= new( :source( DOC ), :path( REP ), :!verbose);
-$cache.update-cache;
-
-#--MARKER-- Test 1
-ok $cache.pod('a-pod-file')[0] ~~ Pod::Block::Named, 'pod is returned from cache';
-
-
 (DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
     =begin pod
     =TITLE More and more
@@ -40,19 +33,36 @@ ok $cache.pod('a-pod-file')[0] ~~ Pod::Block::Named, 'pod is returned from cache
     Some extra changed text but now it is changed
 
     =end pod
-    POD-CONTENT
+POD-CONTENT
+
+$cache .= new( :source( DOC ), :path( REP ), :!verbose);
+$cache.update-cache;
+
+#--MARKER-- Test 1
+ok $cache.pod('a-pod-file')[0] ~~ Pod::Block::Named, 'pod is returned from cache';
 
 $cache .=new(:path( REP ));
 my %h = $cache.hash-files;
 #--MARKER-- Test 2
-is %h<a-second-pod-file>, 'Valid', 'The old version is still in cache, no update-cache';
+is %h<a-second-pod-file>, 'Current', 'The old version is still in cache, no
+update-cache';
 #--MARKER-- Test 3
 lives-ok { $rv = $cache.pod('a-second-pod-file') }, 'Old Pod is provided';
 
 #--MARKER-- Test 4
 like $rv[0].contents[1].contents[0],
-        /'Some more text but now it is changed'/,
+        /'Some extra changed'/,
         'previous text in source';
+
+(DOC ~ '/a-second-pod-file.pod6').IO.spurt(q:to/POD-CONTENT/);
+    =begin pod
+    =TITLE More and more
+
+    Some more text but now it is changed
+
+    =end pod
+POD-CONTENT
+$cache .=new(:source( DOC ), :path( REP ));
 
 diag 'testing freeze';
 #--MARKER-- Test 5
@@ -64,6 +74,7 @@ throws-like { $cache.freeze }, Exception,
 ok $cache.update-cache, 'updates without problem';
 
 #--MARKER-- Test 7
+say $cache.pod('a-second-pod-file')[0];
 like $cache.pod('a-second-pod-file')[0].contents[1].contents[0],
         /'Some more text but now it is changed'/,
         'new version after update';
