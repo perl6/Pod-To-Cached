@@ -4,11 +4,12 @@ use Test;
 use Test::Output;
 use Pod::To::Cached;
 use File::Directory::Tree;
+use File::Temp;
 
-constant REP = 't/tmp/ref';
+constant TMP = tempdir;
+constant REP = TMP ~ '/ref';
 constant DOC = 't/doctest';
 
-rmtree REP;
 my $cache;
 lives-ok {
     $cache = Pod::To::Cached.new( :source( DOC ), :path( REP ), :!verbose)
@@ -17,8 +18,6 @@ lives-ok {
     $cache.update-cache
 }, "update cache";
 
-say $cache.perl;
 ok (REP).IO.d;
-rmtree REP; # just in case
 
 done-testing;

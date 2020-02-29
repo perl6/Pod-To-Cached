@@ -1,22 +1,16 @@
-#!/usr/bin/env perl6
+#!/usr/bin/env raku
 use lib 'lib';
 use Test;
 use File::Directory::Tree;
+use File::Temp;
 use Pod::To::Cached;
 
-constant REP = 't/tmp/ref';
-constant DOC = 't/tmp/doc';
+constant TMP = tempdir;
+constant REP = TMP ~ '/ref';
+constant DOC = TMP ~ '/doc';
 constant INDEX = REP ~ '/file-index.json';
 
 plan 8;
-
-
-if 't/tmp'.IO ~~ :d  {
-    empty-directory 't/tmp';
-}
-else {
-    mktree 't/tmp'
-}
 
 my Pod::To::Cached $cache;
 
@@ -121,3 +115,5 @@ rmtree REP ;
 #--MARKER-- Test 8
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'is not a directory'/), 'Detects absence of source directory';
+
+done-testing;
