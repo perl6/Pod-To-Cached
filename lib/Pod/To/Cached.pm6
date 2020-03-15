@@ -159,7 +159,13 @@ method compile( $source-name, $key, $path, $status is copy ) {
         }
         $!lock.protect( {
             $!precomp.precompile($path.IO, $key, :force );
-            $handle = $!precomp.load($key)[0];
+            $handle = $!precomp.try-load(
+                        CompUnit::PrecompilationDependency::File.new(
+                        :src($path),
+                        :id(CompUnit::PrecompilationId.new-from-string($path)),
+                        :spec(CompUnit::DependencySpecification.new(:short-name($path))),
+                    ),
+            );
         })
     }
     with $handle {

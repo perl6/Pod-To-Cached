@@ -72,3 +72,5 @@ sub path-cmp ($a,  $b --> Bool ) {
 
 rmtree REP;
 rmtree DOC;
+
+done-testing;
