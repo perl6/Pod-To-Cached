@@ -66,7 +66,7 @@ submethod TWEAK {
         mkdir IO::Path.new( $!path );
         self.save-index;
     }
-    my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => $!path.IO );
+    my $precomp-store = CompUnit::PrecompilationStore::File.new(prefix => ($!path~"/.precomp").IO );
     $!precomp = CompUnit::PrecompilationRepository::Document.new(store => $precomp-store);
     # get handles for all Valid / Current files
 
