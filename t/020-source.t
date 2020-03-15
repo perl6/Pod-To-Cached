@@ -238,3 +238,5 @@ is-deeply $cache.hash-files(<Valid Old>), %( 'a-pod-file' => 'Valid', 'pod-file-
 
     =end pod
     POD-CONTENT
+
+done-testing;

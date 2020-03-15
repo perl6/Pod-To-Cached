@@ -29,3 +29,5 @@ rmtree(cache-name);
 Perl6 is quite awesome.
 
 =end pod
+
+done-testing;

@@ -121,3 +121,5 @@ rmtree REP ;
 #--MARKER-- Test 8
 throws-like { $cache .= new(:source( DOC ), :path( REP )) },
     Exception, :message(/'is not a directory'/), 'Detects absence of source directory';
+
+done-testing;

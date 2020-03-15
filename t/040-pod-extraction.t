@@ -68,3 +68,5 @@ throws-like { $cache.update-cache }, Exception, :message(/ 'Cannot update frozen
 
 #--MARKER-- Test 11
 throws-like {$cache.pod('xxxyyyzz') }, Exception, :message(/ 'Source name ｢xxxyyyzz｣ not in cache'/), 'Cannot get POD for invalid source name';
+
+done-testing;
