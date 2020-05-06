@@ -26,7 +26,9 @@ resource to know what is going on in the Perl community now.
 =head1 Raku Advent calendar
 
 The Raku community publishes every December an L<Advent
-Calendar|https://rakuadventcalendar.wordpress.com/>, with Raku tutorials every day until Christmas. Organization and assignment of days is done through the different Raku channels and the L<Perl6/mu|https://github.com/perl6/mu> repository. If you want to participate, it starts organization by the end of October, so check out the channels above for that.
+Calendar|https://rakuadventcalendar.wordpress.com/>, with Raku tutorials
+every day until Christmas. Organization and assignment of days is done
+through the different Raku channels. If you want to participate, it starts organization by the end of October, so check out the channels above for that.
 
 =end pod
 
