@@ -3,23 +3,21 @@ use lib 'lib';
 use Test;
 use Test::Output;
 use Pod::To::Cached;
-use File::Directory::Tree;
+use File::Temp;
 
-constant REP = 't/tmp/ref';
-constant DOC = 't/tmp/doc';
+constant TMP = tempdir;
+constant REP = TMP ~ '/ref';
+constant DOC = 't/doctest';
+
 constant COUNT = 3; # number of caches to create
 
-rmtree DOC if DOC.IO ~~ :d;
-rmtree REP if REP.IO ~~ :d;
-
-mkdir REP;
+plan 9;
 
 diag "Create multiple ({ COUNT }) caches";
 
 my @caches;
 
 for ^COUNT {
-    mkdir REP ~ $_;
     lives-ok {
         @caches[$_] = Pod::To::Cached.new( :source( DOC ), :path( REP ~ $_ ), :!verbose)
     }, "created cache no $_";

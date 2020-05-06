@@ -1,12 +1,14 @@
-use lib 'lib'; # -*- mode: perl6 -*-
+use lib 'lib'; # -*- mode: raku -*-
 use Test;
 use Test::Output;
 use File::Directory::Tree;
 use JSON::Fast;
 use Pod::To::Cached;
+use File::Temp;
 
-constant REP = 't/tmp/ref';
-constant DOC = 't/tmp/doc';
+constant TMP = tempdir;
+constant REP = TMP ~ '/ref';
+constant DOC = TMP ~ '/doc';
 constant INDEX = REP ~ '/file-index.json';
 
 plan 36;
@@ -233,3 +235,5 @@ is-deeply $cache.hash-files(<Valid Old>), %( 'a-pod-file' => 'Valid', 'pod-file-
 
     =end pod
     POD-CONTENT
+
+done-testing;

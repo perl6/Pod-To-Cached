@@ -16,14 +16,15 @@ for <simple sub/simple> -> $doc-name {
     my $handle = $precomp.load($key)[0];
     my $precompiled-pod = nqp::atkey($handle.unit,'$=pod')[0];
     is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod $doc-name";
-    my @dirs = dir( "cache/", test => /ABCD/);
+    # that regex matchs a sha1 name
+    my @dirs = dir( "cache/", test => /<[A..Z 0..9]> ** 5..40/);
     is @dirs.elems, 1, "Cached dir created";
     my $dir = @dirs[0] ~ "/" ~ $key.substr(0,2);
     ok $dir.IO.d, "Key directory created";
     ok "$dir/$key".IO.f, "File cached";
 }
 
-#rmtree(cache-name);
+rmtree(cache-name);
 
 done-testing;
 

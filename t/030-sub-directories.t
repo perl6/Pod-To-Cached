@@ -4,13 +4,14 @@ use Test::Output;
 use JSON::Fast;
 use Pod::To::Cached;
 use File::Directory::Tree;
+use File::Temp;
 
-constant REP = 't/tmp/ref';
-constant DOC = 't/tmp/doc';
+constant TMP = tempdir;
+constant REP = TMP ~ '/ref';
+constant DOC = TMP ~ '/doc';
 constant INDEX = REP ~ '/file-index.json';
 
-rmtree DOC if DOC.IO ~~ :d;
-rmtree REP if REP.IO ~~ :d;
+plan 10;
 
 my Pod::To::Cached $cache;
 my $content = q:to/PODEND/;
@@ -36,12 +37,8 @@ lives-ok { $cache.update-cache }, 'update cache with sub-dirs';
 nok 'sub-dir-1' ~~ any( $cache.hash-files.keys ), 'sub-directories filtered from file list';
 
 
-'t'.IO.&indir( {$cache .= new(:source( 'tmp/doc' ) ) } );
+TMP.IO.&indir( {$cache .= new(:source( DOC ) ) } );
 #--MARKER-- Test 4
-ok 't/.pod-cache'.IO ~~ :d, 'default repository created';
-
-# clean up
-rm-cache 't/.pod-cache';
-nok 't/.pod-cache'.IO ~~ :d, 'Default directory removed';
+ok (TMP ~ '/.pod-cache').IO ~~ :d, 'default repository created';
 
 done-testing;
