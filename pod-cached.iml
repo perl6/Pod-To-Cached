@@ -30,5 +30,13 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module-library">
+      <library name="JSON::Fast:ver&lt;0.9.18+&gt;" type="perl6">
+        <CLASSES />
+        <SOURCES>
+          <root url="raku://1165951813:JSON::Fast:ver&lt;0.9.18+&gt;!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

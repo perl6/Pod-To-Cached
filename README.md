@@ -10,7 +10,8 @@ to add a pod file to a cache.
 
 ## Install
 
-This module is in the [Perl 6 ecosystem](https://modules.perl6.org), so you install it in the usual way:
+This module is in the [Raku ecosystem](https://modules.raku.org), so you
+ install it in the usual way:
 
     zef install Pod::To::Cached
 
