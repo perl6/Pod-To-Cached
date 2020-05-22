@@ -17,7 +17,7 @@ for <simple sub/simple> -> $doc-name {
     my $precompiled-pod = nqp::atkey($handle.unit,'$=pod')[0];
     is-deeply $precompiled-pod, $=pod[0], "Load precompiled pod $doc-name";
     # that regex matchs a sha1 name
-    my @dirs = dir( "cache/", test => /<[A..Z 0..9]> ** 5..40/);
+    my @dirs = dir( "cache/", test => /^ <[A..Z 0..9]> ** 5..40 $/);
     is @dirs.elems, 1, "Cached dir created";
     my $dir = @dirs[0] ~ "/" ~ $key.substr(0,2);
     ok $dir.IO.d, "Key directory created";
