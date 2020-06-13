@@ -7,10 +7,10 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             if $*RAKUDO_MODULE_DEBUG -> $RMD { $RMD("Loading precompiled\n$unit") }
             my $handle := CompUnit::Loader.load-precompilation-file($unit.bytecode-handle);
             $unit.close;
-            nqp::bindhllsym('raku', 'GLOBAL', $preserve_global);
+            nqp::bindhllsym('Raku', 'GLOBAL', $preserve_global);
             CATCH {
                 default {
-                    nqp::bindhllsym('raku', 'GLOBAL', $preserve_global);
+                    nqp::bindhllsym('Raku', 'GLOBAL', $preserve_global);
                     .throw;
                 }
             }

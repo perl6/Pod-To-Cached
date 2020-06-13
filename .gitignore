@@ -4,3 +4,4 @@ t/tmp/
 .pod-cache
 workspace.xml
 *.iml
+.idea/
