@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/pod-cached.iml" filepath="$PROJECT_DIR$/pod-cached.iml" />
+      <module fileurl="file://$PROJECT_DIR$/raku-pod-to-cached.iml" filepath="$PROJECT_DIR$/raku-pod-to-cached.iml" />
     </modules>
   </component>
 </project>

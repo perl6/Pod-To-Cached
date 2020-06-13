@@ -3,14 +3,14 @@ use nqp;
 class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRepository::Default {
     
     method !load-handle-for-path(CompUnit::PrecompilationUnit $unit) {
-            my $preserve_global := nqp::ifnull(nqp::gethllsym('perl6', 'GLOBAL'), Mu);
+            my $preserve_global := nqp::ifnull(nqp::gethllsym('raku', 'GLOBAL'), Mu);
             if $*RAKUDO_MODULE_DEBUG -> $RMD { $RMD("Loading precompiled\n$unit") }
             my $handle := CompUnit::Loader.load-precompilation-file($unit.bytecode-handle);
             $unit.close;
-            nqp::bindhllsym('perl6', 'GLOBAL', $preserve_global);
+            nqp::bindhllsym('raku', 'GLOBAL', $preserve_global);
             CATCH {
                 default {
-                    nqp::bindhllsym('perl6', 'GLOBAL', $preserve_global);
+                    nqp::bindhllsym('raku', 'GLOBAL', $preserve_global);
                     .throw;
                 }
             }
@@ -22,7 +22,7 @@ class CompUnit::PrecompilationRepository::Document is CompUnit::PrecompilationRe
             CompUnit::PrecompilationId $id,
             :$repo-id,
         ) {
-            my $compiler-id = CompUnit::PrecompilationId.new-without-check($*PERL.compiler.id);
+            my $compiler-id = CompUnit::PrecompilationId.new-without-check($*RAKU.compiler.id);
             my $RMD = $*RAKUDO_MODULE_DEBUG;
             for @precomp-stores -> $store {
                 $RMD("Trying to load {$id ~ ($repo-id ?? '.repo-id' !! '')} from $store.prefix()") if $RMD;
