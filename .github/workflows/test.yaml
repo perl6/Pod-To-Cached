@@ -14,8 +14,8 @@ jobs:
                 - "2020.02.1"
                 - "2020.01"
                 - "2019.11"
-          runs-on: ${{ matrix.os }}
-          steps:
+        runs-on: ${{ matrix.os }}
+        steps:
             - uses: actions/checkout@v2
             - uses: Raku/setup-raku@v1
               with:
