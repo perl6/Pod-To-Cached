@@ -15,6 +15,10 @@ This module is in the [Raku ecosystem](https://modules.raku.org), so you
 
     zef install Pod::To::Cached
 
+Although this module is usable, it will be soon substituted by [`Pod::From::Cached`](https://github.com/finanalyst/raku-pod-from-cache). So it's
+ probably better if you try and adapt to that new module.
+
+The module is now in maintenance mode, and only bugfixes will be released.
 
 # SYNOPSIS
 ```perl6
