@@ -24,6 +24,5 @@ jobs:
             - name: Install dependencies
               run: |
                 zef install --/test --deps-only .
-                zef install --/test App::Prove6
             - name: Run tests
               run: zef test .
