@@ -123,6 +123,12 @@ $cache.freeze;
     -  Old  
     A source name that is in the cache but no longer reflects an existing source.
 
+    - **.cache-ignore**: You can create a file named `.cache-ignore` containing Perl 6 regular expressions. Pod6 filenames in `$source` matching at least one of the provided regexes, will be ignored.
+
+    Example:
+    ~~~
+    *podignored*.pod6
+    ~~~
 ## LICENSE
 
 You can use and distribute this module under the terms of the The Artistic License 2.0. See the LICENSE file included in this distribution for complete details.

@@ -35,3 +35,5 @@ done-testing;
 Raku is quite awesome.
 
 =end pod
+
+done-testing;
